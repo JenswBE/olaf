@@ -1,0 +1,101 @@
+# Values to change
+# <PASSWORD_HASH>
+# <CLOUDFLARE_TOKEN>
+
+passwd:
+  users:
+    - name: willemsensj
+      password_hash: "<PASSWORD_HASH>"
+      home_dir: "/home/willemsensj"
+      no_create_home: false
+      groups: ["wheel", "docker", "rkt", "systemd-journal"]
+      no_user_group: false
+
+networkd:
+  units:
+    - name: 10-lan0.link
+      contents: |
+        [Match]
+        MACAddress=40:8d:5c:a4:55:ae
+
+        [Link]
+        Description=LAN
+        MACAddressPolicy=persistent
+        Name=lan0
+
+    - name: 10-wan0.link
+      contents: |
+        [Match]
+        MACAddress=40:8d:5c:a4:55:ad
+
+        [Link]
+        Description=WAN
+        MACAddressPolicy=persistent
+        Name=wan0
+
+    - name: 20-static-lan.network
+      contents: |
+        [Match]
+        Name=lan0
+
+        [Network]
+        DNS=8.8.8.8
+        DNS=8.8.4.4
+
+        [Address]
+        Address=192.168.1.250
+
+        [Route]
+        Gateway=192.168.1.1
+        Destination=192.168.1.0/24
+
+    - name: 20-dhcp-wan.network
+      contents: |
+        [Match]
+        Name=wan0
+
+        [Network]
+        DHCP=yes
+
+update:
+  group: "stable"
+
+locksmith:
+  reboot_strategy: "reboot"
+  window_start: "Sun 2:00"
+  window_length: "2h"
+
+systemd:
+  units:
+    - name: cloudflare-dyndns.service
+      contents: |
+        [Unit]
+        Description=Update CloudFlare DynDNS
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/docker run --name dyndns --rm -e CF_EMAIL=acc.cloudflare@jensw.be -e CF_TOKEN=<CLOUDFLARE_TOKEN> -e CF_ZONE_NAME=jensw.eu -e CF_DOMAIN_NAME=jensw.eu ellerbrock/alpine-cloudflare-dyndns
+
+  - name: cloudflare-dyndns.timer
+      enable: true
+      contents: |
+        [Unit]
+        Description=Send IP update every 20 mins
+
+        [Timer]
+        OnCalendar=*:0/20
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: media-data.mount
+      enable: true
+      contents: |
+        [Mount]
+        What=/dev/sdd
+        Where=/media/data
+        Type=btrfs
+        Options=nofail
+
+        [Install]
+        WantedBy=multi-user.target

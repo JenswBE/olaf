@@ -1,0 +1,55 @@
+# Docker Compose: Web services 
+---
+version: '3'
+
+services:
+  letsencrypt:
+    image: linuxserver/letsencrypt
+    container_name: le
+    ports:
+      - 443:443
+    volumes:
+      - /opt/appdata/letsencrypt/config:/config
+    restart:
+      always
+    depends_on:
+      - portainer
+      - transmission
+    environment:
+      - PUID=233
+      - PGID=233
+      - EMAIL=jens@jensw.be
+      - URL=jensw.eu
+      - SUBDOMAINS=admin,torrent,nextcloud
+      - TZ=Europe/Brussels
+
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    expose:
+      - "9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/appdata/portainer:/data portainer/portainer
+    restart:
+      always
+    privileged: true
+
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    expose:
+      - "9091"
+    ports:
+      - "51413:51413"
+      - "51413:51413/udp"
+    volumes:
+      - /home/docker/transmission:/config
+      - '/media/data/media/000. Plex/Nazien:/downloads/complete'
+      - /media/data/torrent:/downloads/incomplete
+    restart:
+      always
+    environment:
+      - PUID=233
+      - PGID=233
+      - TZ=Europe/Brussels
