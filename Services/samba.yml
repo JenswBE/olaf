@@ -1,0 +1,19 @@
+# Docker Compose: Samba
+# Run command: docker-compose -f services/samba.yml run -d --name samba samba -u "nas;<USER_PASSWORD>" -s "media;/mnt/media;yes;no;no;nas"
+---
+version: '3'
+
+services:
+  samba:
+    image: dperson/samba
+    container_name: samba
+    ports:
+      - "139:139"
+      - "445:445"
+    volumes:
+      - /media/data/media:/mnt/media
+    restart:
+      always
+    environment:
+      - USERID=233
+      - GROUPID=233
