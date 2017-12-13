@@ -8,7 +8,7 @@ passwd:
       password_hash: "<PASSWORD_HASH>"
       home_dir: "/home/willemsensj"
       no_create_home: false
-      groups: ["wheel", "docker", "rkt", "systemd-journal"]
+      groups: ["wheel", "docker", "systemd-journal"]
       no_user_group: false
 
 networkd:
