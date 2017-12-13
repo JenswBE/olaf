@@ -1,0 +1,143 @@
+# Docker Compose: Web services
+# <MARIADB_ROOT>
+# <MARIADB_NEXTCLOUD>
+# <SAMBA_NAS>
+# <PLEX_CLAIM>
+---
+version: '3'
+
+services:
+  
+#########################
+#          WEB          #
+#########################
+  letsencrypt:
+    image: linuxserver/letsencrypt
+    container_name: le
+    networks:
+      - web
+    ports:
+      - "443:443"
+    volumes:
+      - /opt/appdata/letsencrypt:/config
+    restart:
+      always
+    depends_on:
+      - portainer
+      - transmission
+      - nextcloud
+    environment:
+      - PUID=233
+      - PGID=233
+      - EMAIL=jens@jensw.be
+      - URL=jensw.eu
+      - SUBDOMAINS=admin,torrent,nextcloud
+      - TZ=Europe/Brussels
+
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    networks:
+      - web
+    expose:
+      - "9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/appdata/portainer:/data 
+    restart:
+      always
+    privileged: true
+
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    networks:
+      - web
+    expose:
+      - "9091"
+    ports:
+      - "51413:51413"
+      - "51413:51413/udp"
+    volumes:
+      - /opt/appdata/transmission:/config
+      - '/media/data/media/000. Plex/Nazien:/downloads/complete'
+      - /media/data/services/torrent:/downloads/incomplete
+    restart:
+      always
+    environment:
+      - PUID=233
+      - PGID=233
+      - TZ=Europe/Brussels
+  
+  nextcloud:  
+    image: nextcloud
+    container_name: nextcloud
+    networks:
+      - web
+      - db
+    expose:
+      - "80"
+    depends_on:
+      - mariadb
+    volumes:
+      - /opt/appdata/nextcloud:/var/www/html
+      - /media/data/services/nextcloud:/var/www/html/data
+    restart: always
+
+  mariadb:
+    image: mariadb
+    restart: always
+    container_name: mariadb
+    networks:
+      - db
+    volumes:
+      - /opt/appdata/mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=<MARIADB_ROOT>
+      - MYSQL_PASSWORD=<MARIADB_NEXTCLOUD>
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+#########################
+#        SAMBA          #
+#########################
+  samba:
+    image: dperson/samba
+    container_name: samba
+    networks: ["samba"]
+    ports:
+      - "139:139"
+      - "445:445"
+    volumes:
+      - /media/data/media:/mnt/media
+    restart:
+      always
+    environment:
+      - USERID=233
+      - GROUPID=233
+    command: samba.sh -u "nas;<SAMBA_NAS>" -s "media;/mnt/media;yes;no;no;nas"
+
+#########################
+#         PLEX          #
+#########################
+  plex:
+    image: plexinc/pms-docker:1.9.7.4460-a39b25852
+    container_name: plex
+    network_mode: "host"
+    volumes:
+      - "/media/data/media/000. Plex:/data/media"
+      - /media/data/media-plex-optimized/:/data/optimized
+      - /opt/appdata/plex/config:/config
+      - /opt/appdata/plex/transcode:/transcode
+    restart:
+      always
+    environment:
+      - TZ=Europe/Brussels
+      - PLEX_CLAIM=<PLEX_CLAIM>
+      - PLEX_UID=233
+      - PLEX_GID=233
+
+networks:
+  web:
+  db:
+  samba:
