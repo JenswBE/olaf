@@ -2,7 +2,9 @@
 # <MARIADB_ROOT>
 # <MARIADB_NEXTCLOUD>
 # <SAMBA_NAS>
+# <SAMBA_SCANNER>
 # <PLEX_CLAIM>
+# <PLEX_IP>
 ---
 version: '3'
 
@@ -11,20 +13,19 @@ services:
 #########################
 #          WEB          #
 #########################
-  letsencrypt:
+  le:
     image: linuxserver/letsencrypt
     container_name: le
+    restart: always
     networks:
       - web
     ports:
       - "443:443"
     volumes:
       - /opt/appdata/letsencrypt:/config
-    restart:
-      always
     depends_on:
       - portainer
-      - transmission
+      - torrent
       - nextcloud
     environment:
       - PUID=233
@@ -37,33 +38,25 @@ services:
   portainer:
     image: portainer/portainer
     container_name: portainer
+    restart: always
+    privileged: true
     networks:
       - web
     expose:
       - "9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/appdata/portainer:/data 
-    restart:
-      always
-    privileged: true
+      - /opt/appdata/portainer:/data
 
-  transmission:
-    image: linuxserver/transmission
-    container_name: transmission
-    networks:
-      - web
-    expose:
-      - "9091"
-    ports:
-      - "51413:51413"
-      - "51413:51413/udp"
+  torrent:
+    image: linuxserver/deluge
+    container_name: torrent
+    network_mode: "host"
+    restart: always
     volumes:
-      - /opt/appdata/transmission:/config
-      - '/media/data/media/000. Plex/Nazien:/downloads/complete'
-      - /media/data/services/torrent:/downloads/incomplete
-    restart:
-      always
+      - "/media/data/services/torrent/:/running"
+      - "/media/data/media/000. Plex/Nazien:/downloads"
+      - "/opt/appdata/torrent:/config"
     environment:
       - PUID=233
       - PGID=233
@@ -72,6 +65,7 @@ services:
   nextcloud:  
     image: nextcloud
     container_name: nextcloud
+    restart: always
     networks:
       - web
       - db
@@ -82,12 +76,11 @@ services:
     volumes:
       - /opt/appdata/nextcloud:/var/www/html
       - /media/data/services/nextcloud:/var/www/html/data
-    restart: always
 
   mariadb:
     image: mariadb
-    restart: always
     container_name: mariadb
+    restart: always
     networks:
       - db
     volumes:
@@ -104,38 +97,37 @@ services:
   samba:
     image: dperson/samba
     container_name: samba
+    restart: always
     networks: ["samba"]
     ports:
-      - "139:139"
-      - "445:445"
+      - "192.168.1.250:139:139"
+      - "192.168.1.250:445:445"
     volumes:
       - /media/data/media:/mnt/media
-    restart:
-      always
     environment:
       - USERID=233
       - GROUPID=233
-    command: samba.sh -u "nas;<SAMBA_NAS>" -s "media;/mnt/media;yes;no;no;nas"
+    command: samba.sh -S -u "nas;<SAMBA_NAS>" -u "scanner;<SAMBA_SCANNER>" -s "media;/mnt/media;yes;no;no;nas" -s "scans;/mnt/media/Scans;yes;no;no;scanner"
 
 #########################
 #         PLEX          #
 #########################
   plex:
-    image: plexinc/pms-docker:1.9.7.4460-a39b25852
+    image: plexinc/pms-docker
     container_name: plex
+    restart: always
     network_mode: "host"
     volumes:
       - "/media/data/media/000. Plex:/data/media"
       - /media/data/media-plex-optimized/:/data/optimized
       - /opt/appdata/plex/config:/config
       - /opt/appdata/plex/transcode:/transcode
-    restart:
-      always
     environment:
       - TZ=Europe/Brussels
       - PLEX_CLAIM=<PLEX_CLAIM>
       - PLEX_UID=233
       - PLEX_GID=233
+      - ADVERTISE_IP="<PLEX_IP>"
 
 networks:
   web:
