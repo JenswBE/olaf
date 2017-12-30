@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# ===== OPTIONS =====
+# General
+DATE=$(date +"%Y%m%d_%H%M%S")
+BACKUPBASE='/media/stack-backup'
+BACKUPDIR="$BACKUPBASE/$DATE"
+
+# Nextcloud
+NCBASE='/media/data/services/nextcloud'
+NCURL="nextcloud.jensw.eu"
+NCUSER='jens'
+NCPASS='<REPLACE ME>'
+NCCALS=( "personal" "thuis" "werk" )
+
+# GPG
+GPGPASS='<REPLACE ME>'
+GPGOPT="--cipher-algo AES256 --compress-algo BZIP2 --batch --passphrase $GPGPASS -c"
+
+# SQL
+SQLUSER='<REPLACE ME>'
+SQLPASS='<REPLACE ME>'
+
+# ===== Script =====
+# Mount backup location
+mount $BACKUPBASE
+
+# Create dir for today
+mkdir $BACKUPDIR
+
+# Backup database
+mysqldump -u $SQLUSER -p$SQLPASS nextcloud | gpg -o "$BACKUPDIR/db_nextcloud.sql.gpg" $GPGOPT
+
+# Backup contacts
+wget -q --user="$NCUSER" --password="$NCPASS" -O - "https://$NCURL/remote.php/dav/addressbooks/users/$NCUSER/contacts?export" | gpg -o "$BACKUPDIR/contacts.vcf.gpg" $GPGOPT
+
+# Backup calendars
+mkdir "$BACKUPDIR/cals"
+for NCCAL in "${NCCALS[@]}"
+do
+	wget -q --user="$NCUSER" --password="$NCPASS" -O - "https://$NCURL/remote.php/dav/calendars/$NCUSER/$NCCAL?export" | gpg -o "$BACKUPDIR/cals/$NCCAL.ical.gpg" $GPGOPT
+done
+
+# Backup documents
+if [[ $(date +%u) -eq  1 ]] ; then
+	# Monday, full backup
+	tar -c -C "$NCBASE/$NCUSER/files/Documenten/" -g /root/documents.snar-0 --level=0 . | gpg -o "$BACKUPDIR/documents-full.tar.gpg" $GPGOPT
+else
+	# Other day, incremental
+	/bin/cp -f /root/documents.snar-0 /root/documents.snar-1
+	tar -c -C "$NCBASE/$NCUSER/files/Documenten/" -g /root/documents.snar-1 . | gpg -o "$BACKUPDIR/documents-inc.tar.gpg" $GPGOPT
+fi
+
+# Backup other files
+gpg -o "$BACKUPDIR/JensWillemsens.kdbx.gpg" $GPGOPT "$NCBASE/jens/files/IT/JensWillemsens.kdbx"
+tar -c -C "$NCBASE/jens/files/Notes/" . | gpg -o "$BACKUPDIR/notes.tar.gpg" $GPGOPT
+
+# Unmount backup location
+sync
+umount $BACKUPBASE &> /dev/null
