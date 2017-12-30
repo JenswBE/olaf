@@ -88,6 +88,28 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+    - name: btrfs-scrub.service
+      contents: |
+        [Unit]
+        Description=Scrub BTRFS data drives
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/sbin/btrfs scrub start -Bd /media/data
+
+    - name: btrfs-scrub.timer
+      enable: true
+      contents: |
+        [Unit]
+        Description=Scrub BTRFS data drives every 1st of the month
+
+        [Timer]
+        OnCalendar=*-*-01 05:00:00
+        Persistent=true
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: media-data.mount
       enable: true
       contents: |
@@ -95,7 +117,7 @@ systemd:
         What=/dev/sdd
         Where=/media/data
         Type=btrfs
-        Options=nofail
+        # Options=nofail
 
         [Install]
         WantedBy=multi-user.target
