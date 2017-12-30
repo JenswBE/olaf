@@ -24,12 +24,45 @@ NCURL="nextcloud.jensw.eu"
 NCUSER='jens'
 NCPASS='<REPLACE ME>'
 NCCONTACTS=( "Persoonlijk" )
-NCCALS=( "personal" "thuis" "werk" )
+NCCALS=( "persoonlijk" "thuis" "werk" )
 
 # SQL (Read access on Nextcloud DB)
 SQLUSER='nextcloud'
 SQLPASS='<REPLACE ME>'
 SQLCONTAINER='mariadb'
+
+
+# ===== cURL webdav helper functions =====
+# Create a new directory
+function dav_create_dir () {
+  STATUS=$(curl -X MKCOL ${CURLOPTS} "${DAVURL}/$1")
+
+  if [ ${STATUS} -ne 201 ]; then
+    echo "Creating dir \"$1\" gave status ${STATUS}"
+    exit 1
+  fi
+}
+
+# Upload file
+function dav_upload_file () {
+  STATUS=$(curl -T $1 ${CURLOPTS} "${DAVURL}/")
+  
+  if [ ${STATUS} -ne 201 ]; then
+    echo "Uploading file \"$1\" gave status ${STATUS}"
+    exit 1
+  fi
+}
+
+# Encrypt STDIN and send to WebDAV
+function dav_encrypt_upload_stdin () {
+  STATUS=$(gpg ${GPGOPT} | curl -T - ${CURLOPTS} "${DAVURL}/$1")
+  
+  if [ ${STATUS} -ne 201 ]; then
+    echo "Uploading stdin to \"$1\" gave status ${STATUS}"
+    exit 1
+  fi
+}
+
 
 # ===== Script =====
 # Create dir for today
@@ -50,38 +83,26 @@ for NCCAL in "${NCCALS[@]}"; do
     curl --silent --show-error -u "${NCUSER}:${NCPASS}" "https://${NCURL}/remote.php/dav/calendars/${NCUSER}/${NCCAL}?export" | dav_encrypt_upload_stdin "${BACKUPDIR}/cals/$NCCAL.ical.gpg"
 done
 
-# Backup documents
-if [[ $(date +%u) -eq  1 ]] ; then
-    # Monday, full backup
-    tar -c -C "${NCBASE}/${NCUSER}/files/Documenten/" -g /root/documents.snar-0 --level=0 . | dav_encrypt_upload_stdin "${BACKUPDIR}/documents-full.tar.gpg"
-else
-    # Other day, incremental
-    cp -f /root/documents.snar-0 /root/documents.snar-1
-    tar -c -C "${NCBASE}/${NCUSER}/files/Documenten/" -g /root/documents.snar-1 . | dav_encrypt_upload_stdin "${BACKUPDIR}/documents-inc.tar.gpg"
-fi
-
-# Backup other files
+# Backup files
 cat "${NCBASE}/${NCUSER}/files/IT/JensWillemsens.kdbx" | dav_encrypt_upload_stdin "${BACKUPDIR}/JensWillemsens.kdbx.gpg"
 tar -c -C "${NCBASE}/${NCUSER}/files/Notes/" . | dav_encrypt_upload_stdin "${BACKUPDIR}/notes.tar.gpg"
 
-
-# ===== cURL webdav helper functions =====
-# Create a new directory
-function dav_create_dir () {
-  STATUS=$(curl -X MKCOL ${CURLOPTS} "${DAVURL}/$1")
-
-  if [ ${STATUS} -ne 201 ]; then
-    echo "Creating dir \"$1\" gave status ${STATUS}"
-    exit 1
-  fi
-}
-
-# Encrypt STDIN and send to WebDAV
-function dav_encrypt_upload_stdin () {
-  STATUS=$(gpg ${GPGOPT} | curl -T - ${CURLOPTS} "${DAVURL}/$1")
-  
-  if [ ${STATUS} -ne 201 ]; then
-    echo "Uploading file \"$1\" gave status ${STATUS}"
-    exit 1
-  fi
-}
+# Backup documents
+if [ $(date +%u) -eq  1 ]; then
+    # Monday, full backup
+    if [ -e "/tmp/documents-full.tar.gpg" ]; then
+      shred -u  "/tmp/documents-full.tar.gpg" 2> /dev/null
+    fi
+    tar -c -C "${NCBASE}/${NCUSER}/files/Documenten/" -g /root/documents.snar-0 --level=0 . | gpg -o "/tmp/documents-full.tar.gpg" ${GPGOPT}
+    dav_upload_file "/tmp/documents-full.tar.gpg"
+    shred -u  "/tmp/documents-full.tar.gpg"
+else
+    # Other day, incremental
+    if [ -e "/tmp/documents-inc.tar.gpg" ]; then
+      shred -u  "/tmp/documents-inc.tar.gpg" 2> /dev/null
+    fi
+    cp -f /root/documents.snar-0 /root/documents.snar-1
+    tar -c -C "${NCBASE}/${NCUSER}/files/Documenten/" -g /root/documents.snar-1 . | gpg -o "/tmp/documents-inc.tar.gpg" ${GPGOPT}
+    dav_upload_file "/tmp/documents-inc.tar.gpg"
+    shred -u  "/tmp/documents-inc.tar.gpg"
+fi
