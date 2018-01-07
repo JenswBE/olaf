@@ -6,12 +6,15 @@ set -euo pipefail
 
 # ===== OPTIONS =====
 # General
-BACKUPDIR=$(date +"%Y%m%d_%H%M%S")
+# Backup dir name will be "PREFIX_full" or "PREFIX_inc"
+BACKUPDIR_PREFIX=$(date +"%Y%m%d_%H%M%S")
+# Day of full backup, 1 is Monday
+FULLBACKUPDAY=1
 
 # WebDAV
-DAVUSER='JensWillemsens'
+DAVUSER='acc.box@jensw.be'
 DAVPASS='<REPLACE ME>'
-DAVURL='https://jenswillemsens.stackstorage.com/remote.php/webdav'
+DAVURL='https://dav.box.com/dav'
 CURLOPTS="--silent --show-error -o /dev/null -Iw %{http_code} -u ${DAVUSER}:${DAVPASS}"
 
 # GPG (Password and options for output)
@@ -45,7 +48,7 @@ function dav_create_dir () {
 
 # Upload file
 function dav_upload_file () {
-  STATUS=$(curl -T $1 ${CURLOPTS} "${DAVURL}/")
+  STATUS=$(curl -T $1 ${CURLOPTS} --header "Transfer-Encoding: chunked" "${DAVURL}/$2/")
   
   if [ ${STATUS} -ne 201 ]; then
     echo "Uploading file \"$1\" gave status ${STATUS}"
@@ -65,6 +68,14 @@ function dav_encrypt_upload_stdin () {
 
 
 # ===== Script =====
+# Determine BACKUPDIR
+if [ $(date +%u) -eq ${FULLBACKUPDAY} ]; then
+  BACKUPDIR="${BACKUPDIR_PREFIX}_full"
+else
+  BACKUPDIR="${BACKUPDIR_PREFIX}_inc"
+fi
+
+
 # Create dir for today
 dav_create_dir ${BACKUPDIR}
 
@@ -88,13 +99,13 @@ cat "${NCBASE}/${NCUSER}/files/IT/JensWillemsens.kdbx" | dav_encrypt_upload_stdi
 tar -c -C "${NCBASE}/${NCUSER}/files/Notes/" . | dav_encrypt_upload_stdin "${BACKUPDIR}/notes.tar.gpg"
 
 # Backup documents
-if [ $(date +%u) -eq  1 ]; then
+if [ $(date +%u) -eq 1 ]; then
     # Monday, full backup
     if [ -e "/tmp/documents-full.tar.gpg" ]; then
       shred -u  "/tmp/documents-full.tar.gpg" 2> /dev/null
     fi
     tar -c -C "${NCBASE}/${NCUSER}/files/Documenten/" -g /root/documents.snar-0 --level=0 . | gpg -o "/tmp/documents-full.tar.gpg" ${GPGOPT}
-    dav_upload_file "/tmp/documents-full.tar.gpg"
+    dav_upload_file "/tmp/documents-full.tar.gpg" ${BACKUPDIR}
     shred -u  "/tmp/documents-full.tar.gpg"
 else
     # Other day, incremental
@@ -103,6 +114,6 @@ else
     fi
     cp -f /root/documents.snar-0 /root/documents.snar-1
     tar -c -C "${NCBASE}/${NCUSER}/files/Documenten/" -g /root/documents.snar-1 . | gpg -o "/tmp/documents-inc.tar.gpg" ${GPGOPT}
-    dav_upload_file "/tmp/documents-inc.tar.gpg"
+    dav_upload_file "/tmp/documents-inc.tar.gpg" ${BACKUPDIR}
     shred -u  "/tmp/documents-inc.tar.gpg"
 fi
