@@ -7,11 +7,7 @@ Config for my home NAS
 1. Edit file "/opt/appdata/letsencrypt/nginx/site-confs/default"
 2. Create "server"-block for following domains:
   - "torrent.*" => "http://192.168.1.250:8112"
-  - "admin.*" => "http://portainer:9000"
   - "nextcloud.*" => http://nextcloud
-
-### Portainer
-Visit https://admin.jensw.be to create admin account
 
 ### Deluge
 1. Go through online settings

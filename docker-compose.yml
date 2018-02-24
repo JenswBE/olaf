@@ -9,7 +9,7 @@
 version: '3'
 
 services:
-  
+
 #########################
 #          WEB          #
 #########################
@@ -20,33 +20,21 @@ services:
     networks:
       - web
     ports:
+      - "80:80"
       - "443:443"
     volumes:
       - /opt/appdata/letsencrypt:/config
     depends_on:
-      - portainer
       - torrent
       - nextcloud
     environment:
       - PUID=233
       - PGID=233
+      - VALIDATION=http
       - EMAIL=jens@jensw.be
       - URL=jensw.eu
-      - SUBDOMAINS=admin,torrent,nextcloud
+      - SUBDOMAINS=torrent,nextcloud
       - TZ=Europe/Brussels
-
-  portainer:
-    image: portainer/portainer
-    container_name: portainer
-    restart: always
-    privileged: true
-    networks:
-      - web
-    expose:
-      - "9000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/appdata/portainer:/data
 
   torrent:
     image: linuxserver/deluge
@@ -61,8 +49,8 @@ services:
       - PUID=233
       - PGID=233
       - TZ=Europe/Brussels
-  
-  nextcloud:  
+
+  nextcloud:
     image: nextcloud
     container_name: nextcloud
     restart: always
