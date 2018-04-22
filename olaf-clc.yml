@@ -88,6 +88,50 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+    - name: backup-nextcloud.service
+      contents: |
+        [Unit]
+        Description=Backup Nextcloud every night
+
+        [Service]
+        Type=simple
+        ExecStart=/opt/bin/backup-nextcloud
+
+    - name: backup-nextcloud.timer
+      enable: true
+      contents: |
+        [Unit]
+        Description=Backup Nextcloud every night
+
+        [Timer]
+        OnCalendar=*-*-* 04:00:00
+        Persistent=true
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: update-containers.service
+      contents: |
+        [Unit]
+        Description=Updates docker containers prior to reboot
+
+        [Service]
+        Type=oneshot
+        ExecStart=/opt/bin/docker-compose -f /home/willemsensj/docker-compose.yml pull
+
+    - name: update-containers.timer
+      enable: true
+      contents: |
+        [Unit]
+        Description=Updates docker containers prior to reboot
+
+        [Timer]
+        OnCalendar=Sun *-*-* 01:00:00
+        Persistent=true
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: btrfs-scrub.service
       contents: |
         [Unit]

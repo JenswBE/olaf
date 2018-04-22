@@ -3,6 +3,15 @@ Config for my home NAS
 
 ## Post installation
 
+### Install binaries
+
+#### Backup Nextcloud
+1. Copy paste script "backup-nextcloud" to "/opt/bin/backup-nextcloud"
+2. Make script executable
+
+#### Install Docker Compose
+Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at "/opt/bin/docker-compose"
+
 ### Letsencrypt
 1. Edit file "/opt/appdata/letsencrypt/nginx/site-confs/default"
 2. Create "server"-block for following domains:
