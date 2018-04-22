@@ -88,6 +88,27 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+    - name: btrfs-snapshot.service
+      contents: |
+        [Unit]
+        Description=Check for BTRFS snapshot every hour
+
+        [Service]
+        Type=oneshot
+        ExecStart=/opt/bin/btrfs-snapshot
+
+    - name: btrfs-snapshot.timer
+      enable: true
+      contents: |
+        [Unit]
+        Description=Check for BTRFS snapshot every hour
+
+        [Timer]
+        OnCalendar=hourly
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: backup-nextcloud.service
       contents: |
         [Unit]
@@ -161,7 +182,19 @@ systemd:
         What=/dev/sdd
         Where=/media/data
         Type=btrfs
-        # Options=nofail
+        Options=subvol=main
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: media-backup.mount
+      enable: true
+      contents: |
+        [Mount]
+        What=/dev/sdd
+        Where=/media/backup
+        Type=btrfs
+        Options=subvol=backup
 
         [Install]
         WantedBy=multi-user.target

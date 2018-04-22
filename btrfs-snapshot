@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+# Author: Jens Willemsens <jens@jensw.be>
+
+# ===== OPTIONS =====
+BACKUP_SOURCE=/media/data
+BACKUP_TARGET_DIR=/media/backup
+BTRFS_SNAP=/opt/bin/btrfs-snap
+
+${BTRFS_SNAP} -pcr -B ${BACKUP_TARGET_DIR} -T 3000 ${BACKUP_SOURCE} main_hourly 24
+${BTRFS_SNAP} -pcr -B ${BACKUP_TARGET_DIR} -T 86000 ${BACKUP_SOURCE} main_daily 7
+${BTRFS_SNAP} -pcr -B ${BACKUP_TARGET_DIR} -T 604000 ${BACKUP_SOURCE} main_weekly 4
+${BTRFS_SNAP} -pcr -B ${BACKUP_TARGET_DIR} -T 2419000 ${BACKUP_SOURCE} main_monthly 3

@@ -6,11 +6,14 @@ Config for my home NAS
 ### Install binaries
 
 #### Backup Nextcloud
-1. Copy paste script "backup-nextcloud" to "/opt/bin/backup-nextcloud"
-2. Make script executable
+Copy script "backup-nextcloud" to "/opt/bin/backup-nextcloud" and make executable
 
-#### Install Docker Compose
+#### Docker Compose
 Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at "/opt/bin/docker-compose"
+
+#### BTRFS snapshots
+1. Download the [BTRFS snap script](https://github.com/jf647/btrfs-snap) to "/opt/bin/btrfs-snap" and make executable
+2. Copy script "btrfs-snapshot" to "/opt/bin/btrfs-snapshot" and make executable 
 
 ### Letsencrypt
 1. Edit file "/opt/appdata/letsencrypt/nginx/site-confs/default"
