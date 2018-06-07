@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+
+# Author: Jens Willemsens <jens@jensw.be>
+
+# ===== SETUP =====
+# 1. Create a new user on the RECEIVER with the command: "sudo useradd -r <RECV_USER>"
+# 2. Create new SSH key pair with: "sudo -u <RECV_USER> ssh-keygen -N <RECV_PASS>"
+# 3. Send the "~/.ssh/id_rsa.pub" file to the sender through SCP
+#
+# 4. Create a new user on the SENDER with the command: "sudo useradd -rR /var/www/html <BACKUP_USER>"
+# 5. Add new user to ssh allowed group (if setup): "sudo usermod -a -G ssh_users <BACKUP_USER>"
+# 6. Create new SSH key pair with: "sudo -u <BACKUP_USER> ssh-keygen"
+# 7. Append the public key of step 3 to the file "~/.ssh/authorized_keys"
+# 8. Create a new SQL user with following statement: "GRANT SELECT, LOCK TABLES, SHOW VIEW ON *.* TO '<SQL_USER>'@'localhost' IDENTIFIED BY '<SQL_PASS>';"
+# 9. Flush privileges with "FLUSH PRIVILEGES;"
+# 10. Test if you can dump the database with "mysqldump -A -u <SQL_USER> -p<SQL_PASS>"
+#
+# 11. Verify on RECEIVER if you can connect without password through SSH
+
+
+# ===== OPTIONS =====
+# Sender
+SEND_HOST='<REPLACE ME>'
+SEND_USER='<REPLACE ME>' # The backup user
+SQL_USER='<REPLACE ME>'
+SQL_PASS='<REPLACE ME>'
+
+# Receiver
+RECV_USER='<REPLACE ME>' # The backup user
+RECV_PASS='<REPLACE ME>' # Passphrase of SSH key
+RECV_LOC='<REPLACE ME>' # Backup to location
+
+
+# ===== SCRIPT =====
+# Backup SQL
+ssh ${SEND_USER}@${SEND_HOST} "sqldump -A -u ${SQL_USER} -p${SQL_PASS} | bzip2 -zc" > "${RECV_LOC}/${SEND_HOST}.sqldump.bz2"
+
+# Backup webroot
+
