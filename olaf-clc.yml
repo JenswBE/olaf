@@ -1,6 +1,7 @@
 # Values to change
 # <PASSWORD_HASH>
 # <CLOUDFLARE_TOKEN>
+# <VPS_BACKUP_USER>
 
 passwd:
   users:
@@ -126,6 +127,29 @@ systemd:
 
         [Timer]
         OnCalendar=*-*-* 04:00:00
+        Persistent=true
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: backup-vps.service
+      contents: |
+        [Unit]
+        Description=Backup VPS every night
+
+        [Service]
+        Type=simple
+        ExecStart=/opt/bin/backup-vps
+        User=<VPS_BACKUP_USER>
+
+    - name: backup-vps.timer
+      enable: true
+      contents: |
+        [Unit]
+        Description=Backup VPS every night
+
+        [Timer]
+        OnCalendar=*-*-* 03:00:00
         Persistent=true
 
         [Install]
