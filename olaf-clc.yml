@@ -14,15 +14,6 @@ passwd:
 
 networkd:
   units:
-    - name: sshd.socket
-      dropins:
-      - name: 10-sshd-port.conf
-        contents: |
-          [Socket]
-          ListenStream=
-          ListenStream=2222
-          ListenStream=8080
-
     - name: 10-lan0.link
       contents: |
         [Match]

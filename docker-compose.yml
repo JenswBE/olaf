@@ -5,7 +5,6 @@
 # <SAMBA_SCANNER>
 # <PLEX_CLAIM>
 # <PLEX_IP>
-# <DEVICE_TOKEN>
 ---
 version: '3'
 
@@ -118,22 +117,7 @@ services:
       - PLEX_GID=233
       - ADVERTISE_IP="<PLEX_IP>"
 
-#########################
-#      SSH HONYPOT      #
-#########################
-  haas:
-    image: cznic/haas-proxy
-    container_name: haas
-    networks: ["haas"]
-    ports:
-      - "22:2222"
-    restart:
-      always
-    environment:
-      - DEVICE_TOKEN=<DEVICE_TOKEN>
-
 networks:
   web:
   db:
   samba:
-  haas:
