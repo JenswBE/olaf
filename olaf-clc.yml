@@ -203,7 +203,7 @@ systemd:
       enable: true
       contents: |
         [Mount]
-        What=/dev/sdd
+        What=/dev/disk/by-uuid/c44fbbe8-f708-4bbd-9dfc-8a0fa15fc956
         Where=/media/data
         Type=btrfs
         Options=subvol=main
@@ -215,7 +215,7 @@ systemd:
       enable: true
       contents: |
         [Mount]
-        What=/dev/sdd
+        What=/dev/disk/by-uuid/c44fbbe8-f708-4bbd-9dfc-8a0fa15fc956
         Where=/media/backup
         Type=btrfs
         Options=subvol=backup
