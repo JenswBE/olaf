@@ -71,7 +71,20 @@ systemd:
     - name: cloudflare-dyndns.service
       contents: |
         [Unit]
+        Description=Unit Fail Mailer Service
+        After=network.target
+
+        [Service]
+        Type=simple
+        ExecStart=/opt/bin/systemd-mailjet %I
+        EnvironmentFile=/opt/conf/systemd-mailjet.conf
+        User=systemd-mailjet
+
+    - name: cloudflare-dyndns.service
+      contents: |
+        [Unit]
         Description=Update CloudFlare DynDNS
+        OnFailure=unit-fail-mail@%n.service
 
         [Service]
         Type=oneshot
@@ -93,6 +106,7 @@ systemd:
       contents: |
         [Unit]
         Description=Check for BTRFS snapshot every hour
+        OnFailure=unit-fail-mail@%n.service
 
         [Service]
         Type=oneshot
@@ -114,6 +128,7 @@ systemd:
       contents: |
         [Unit]
         Description=Backup Nextcloud every night
+        OnFailure=unit-fail-mail@%n.service
 
         [Service]
         Type=simple
@@ -136,6 +151,7 @@ systemd:
       contents: |
         [Unit]
         Description=Backup VPS every night
+        OnFailure=unit-fail-mail@%n.service
 
         [Service]
         Type=simple
@@ -159,6 +175,7 @@ systemd:
       contents: |
         [Unit]
         Description=Updates docker containers prior to reboot
+        OnFailure=unit-fail-mail@%n.service
 
         [Service]
         Type=oneshot
@@ -181,6 +198,7 @@ systemd:
       contents: |
         [Unit]
         Description=Scrub BTRFS data drives
+        OnFailure=unit-fail-mail@%n.service
 
         [Service]
         Type=simple

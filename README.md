@@ -5,9 +5,19 @@ Config for my home NAS
 
 ### Install binaries
 
+#### Systemd Mailjet
+Send mail on failed unit. See https://github.com/JensWillemsens/systemd-mailjet for more info.
+1. Create a new user with `sudo useradd -r systemd-mailjet`
+2. Copy executable `bin/systemd-mailjet` to `/opt/bin/systemd-mailjet` and make executable
+3. Create a new folder `sudo mkdir /opt/conf`
+4. Complete file `conf/systemd-mailjet.conf` and copy to `/opt/conf/systemd-mailjet.conf`
+5. Make file readonly by owner `sudo chmod 400 /opt/conf/systemd-mailjet.conf`
+6. Set correct owner `sudo chown systemd-mailjet:systemd-mailjet /opt/conf/systemd-mailjet.conf`
+
 #### Backup Nextcloud
-1. Copy script `backup-nextcloud` to `/opt/bin/backup-nextcloud` and make executable
+1. Copy script `bin/backup-nextcloud` to `/opt/bin/backup-nextcloud` and make executable
 2. Edit script and add correct information below heading OPTIONS
+3. Set correct permissions `sudo chmod 500 /opt/bin/backup-nextcloud`
 
 #### Backup VPS
 1. Setup receiver
@@ -23,15 +33,17 @@ Config for my home NAS
   6. Flush privileges with `FLUSH PRIVILEGES;`
   7. Test if you can dump the database with `mysqldump -A -u <SQL_USER> -p<SQL_PASS>`
 3. Verify on the RECEIVER if you can connect without password through SSH
-4. Copy script `backup-vps` to `/opt/bin/backup-vps` and make executable
+4. Copy script `bin/backup-vps` to `/opt/bin/backup-vps` and make executable
 5. Edit script and add correct information below heading OPTIONS
+6. Set correct permissions `sudo chmod 500 /opt/bin/backup-vps`
 
 #### Docker Compose
-Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at "/opt/bin/docker-compose"
+Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at `/opt/bin/docker-compose`
 
 #### BTRFS snapshots
-1. Download the [BTRFS snap script](https://github.com/jf647/btrfs-snap) to "/opt/bin/btrfs-snap" and make executable
-2. Copy script "btrfs-snapshot" to "/opt/bin/btrfs-snapshot" and make executable
+1. Download the [BTRFS snap script](https://github.com/jf647/btrfs-snap) to `/opt/bin/btrfs-snap` and make executable
+2. Copy script `bin/btrfs-snapshot` to `/opt/bin/btrfs-snapshot` and make executable
+3. Set correct permissions `sudo chmod 544 /opt/bin/btrfs-snap /opt/bin/btrfs-snapshot`
 
 ### Letsencrypt
 1. Edit file "/opt/appdata/letsencrypt/nginx/site-confs/default"

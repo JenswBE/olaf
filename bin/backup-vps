@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+
+# Author: Jens Willemsens <jens@jensw.be>
+# Setup: See global README
+
+
+# ===== OPTIONS =====
+# Sender
+SEND_HOST='<REPLACE ME>'
+SEND_USER='<REPLACE ME>' # The backup user
+SQL_USER='<REPLACE ME>'
+SQL_PASS='<REPLACE ME>'
+WEBROOT='/var/www/html'
+
+# Receiver
+RECV_LOC='<REPLACE ME>' # Backup to location
+
+# ===== SCRIPT =====
+# Backup SQL
+ssh ${SEND_USER}@${SEND_HOST} "mysqldump -A -u ${SQL_USER} -p${SQL_PASS} | bzip2 -zc" > "${RECV_LOC}/${SEND_HOST}.sqldump.bz2"
+
+# Backup webroot
+BACKUP_LOC="${RECV_LOC}/${SEND_HOST}-webroot-day$(date +%u).tar.bz2"
+SNAR_LOC="/home/${SEND_USER}/webroot.snar"
+if [ $(date +%u) -eq 1 ]; then
+    # Monday, full backup
+    ssh ${SEND_USER}@${SEND_HOST} "tar -c -C ${WEBROOT} -g ${SNAR_LOC}-0 --level=0 . | bzip2 -zc" > "${BACKUP_LOC}"
+else
+    # Other day, incremental
+    ssh ${SEND_USER}@${SEND_HOST} "touch ${SNAR_LOC}-0"
+    ssh ${SEND_USER}@${SEND_HOST} "cp -f ${SNAR_LOC}-0 ${SNAR_LOC}-1"
+    ssh ${SEND_USER}@${SEND_HOST} "tar -c -C ${WEBROOT} -g ${SNAR_LOC}-1 . | bzip2 -zc" > "${BACKUP_LOC}"
+fi
