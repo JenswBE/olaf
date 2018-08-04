@@ -1,4 +1,6 @@
 # Docker Compose: Web services
+# <OFFICE_USER>
+# <OFFICE_PASS>
 # <MARIADB_ROOT>
 # <MARIADB_NEXTCLOUD>
 # <SAMBA_NAS>
@@ -49,6 +51,23 @@ services:
       - PGID=233
       - TZ=Europe/Brussels
 
+  office:
+    image: collabora/code
+    container_name: office
+    restart: always
+    cap_add:
+      - MKNOD
+    networks:
+      - web
+    expose:
+      - "9980"
+    depends_on:
+      - le
+    environment:
+      - domain=nextcloud.jensw.eu
+      - username=<OFFICE_USER>
+      - password=<OFFICE_PASS>
+
   nextcloud:
     image: nextcloud
     container_name: nextcloud
@@ -61,6 +80,7 @@ services:
     depends_on:
       - le
       - mariadb
+      - office
     volumes:
       - /opt/appdata/nextcloud:/var/www/html
       - /media/data/services/nextcloud:/var/www/html/data
