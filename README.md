@@ -46,10 +46,7 @@ Use [following instructions](https://docs.docker.com/compose/install/#install-co
 3. Set correct permissions `sudo chmod 544 /opt/bin/btrfs-snap /opt/bin/btrfs-snapshot`
 
 ### Letsencrypt
-1. Edit file "/opt/appdata/letsencrypt/nginx/site-confs/default"
-2. Create "server"-block for following domains:
-  - "torrent.*" => "http://192.168.1.250:8112"
-  - "nextcloud.*" => http://nextcloud
+Copy file `conf/letsencrypt` to `/opt/appdata/letsencrypt/nginx/site-confs/default`
 
 ### Deluge
 1. Go through online settings
