@@ -1,6 +1,16 @@
 # Olaf the Great NAS
 Config for my home NAS
 
+Big thanks to https://github.com/norweeg/self-hosted-docker-server-templates for providing a template for Traefik/Nextcloud/Collabora! 
+
+## CloudLinux Config
+Change following settings in the config:
+- User settings (name, password and home folder)
+- CloudFlare DynDNS (email, token, zone name and domain name)
+- VPS backup user
+- Mounts
+- ...
+
 ## Post installation
 
 ### Install binaries
@@ -45,15 +55,22 @@ Use [following instructions](https://docs.docker.com/compose/install/#install-co
 2. Copy script `bin/btrfs-snapshot` to `/opt/bin/btrfs-snapshot` and make executable
 3. Set correct permissions `sudo chmod 544 /opt/bin/btrfs-snap /opt/bin/btrfs-snapshot`
 
-### Letsencrypt
-Copy file `conf/letsencrypt` to `/opt/appdata/letsencrypt/nginx/site-confs/default`
+### Setup containers
 
-### Deluge
+#### Traefik
+Edit file `conf/traefik.toml` and change parameters `domain` and `email`
+
+#### Collabora Office
+Edit file `conf/nc-office-proxy.conf` and change parameter `server_name` on the third line
+
+#### Deluge
 1. Go through online settings
   - Category Downloads
-    - Set "Download to" to "/running"
-    - Set "Move completed to" to "/downloads"
+    - Set "Download to" to `/running`
+    - Set "Move completed to" to `/downloads`
     - Set "Allocation" to "Use Full"
+  - Category Network
+    - Change incoming port to fixed port `58946`
   - Category Interface
     - Change password
   - Category Queue
@@ -62,11 +79,10 @@ Copy file `conf/letsencrypt` to `/opt/appdata/letsencrypt/nginx/site-confs/defau
     - Enable "Remove torrent when share ratio is reached"
 2. Stop container
 3. Edit web.conf
-  - Set "interface" to "192.168.1.250"
-  - Set "default_daemon" to "127.0.0.1:58846"
+  - Set "default_daemon" to `127.0.0.1:58846`
 4. Start container
 
-### Plex
+#### Plex
 Go to https://app.plex.tv to setup following libraries:
 - Films
   - /data/media/Movies

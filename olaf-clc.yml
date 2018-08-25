@@ -172,29 +172,6 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    - name: update-containers.service
-      contents: |
-        [Unit]
-        Description=Updates docker containers prior to reboot
-        OnFailure=unit-fail-mail@%n.service
-
-        [Service]
-        Type=oneshot
-        ExecStart=/opt/bin/docker-compose -f /home/willemsensj/docker-compose.yml pull
-
-    - name: update-containers.timer
-      enable: true
-      contents: |
-        [Unit]
-        Description=Updates docker containers prior to reboot
-
-        [Timer]
-        OnCalendar=Sun *-*-* 01:00:00
-        Persistent=true
-
-        [Install]
-        WantedBy=multi-user.target
-
     - name: btrfs-scrub.service
       contents: |
         [Unit]

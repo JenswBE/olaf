@@ -1,103 +1,167 @@
-# Docker Compose: Web services
-# <OFFICE_USER>
-# <OFFICE_PASS>
-# <MARIADB_ROOT>
-# <MARIADB_NEXTCLOUD>
-# <SAMBA_NAS>
-# <SAMBA_SCANNER>
-# <PLEX_CLAIM>
-# <PLEX_IP>
----
-version: '3'
+version: '3.5'
 
 services:
 
 #########################
-#          WEB          #
+#         PROXY         #
 #########################
-  le:
-    image: linuxserver/letsencrypt
-    container_name: le
+  reverse-proxy:
+    image: traefik:latest
+    container_name: traefik    
+    restart: always 
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    networks:
+      - frontend-nextcloud
+      - frontend-torrent
+      - frontend-pihole
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./conf/traefik.toml:/traefik.toml
+      - traefik-cert:/etc/traefik/acme/ 
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+#########################
+#      AUTO-UPDATER     #
+#########################
+  auto-updater:
+    image: v2tec/watchtower:latest
+    container_name: watchtower
+    restart: always
+    labels:
+      - "traefik.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --label-enable --cleanup
+    network_mode: bridge
+
+#########################
+#      NEXTCLOUD        #
+#########################
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    hostname: nextcloud
     restart: always
     networks:
-      - web
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /opt/appdata/letsencrypt:/config
-    environment:
-      - PUID=233
-      - PGID=233
-      - VALIDATION=http
-      - EMAIL=jens@jensw.be
-      - URL=jensw.eu
-      - SUBDOMAINS=torrent,nextcloud
-      - TZ=Europe/Brussels
-
-  torrent:
-    image: linuxserver/deluge
-    container_name: torrent
-    network_mode: "host"
-    restart: always
+      - frontend-nextcloud
+      - backend-nextcloud
     depends_on:
-      - le
+      - nc-db
+      - nc-office
     volumes:
-      - "/media/data/services/torrent/:/running"
-      - "/media/data/media/000. Plex/Nazien:/downloads"
-      - "/opt/appdata/torrent:/config"
+      - "${PATH_APPDATA}/nextcloud:/var/www/html"
+      - /media/data/services/nextcloud:/var/www/html/data
     environment:
-      - PUID=233
-      - PGID=233
-      - TZ=Europe/Brussels
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=${NC_DB_PW_NEXTCLOUD}
+      - MYSQL_HOST=nc-db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.backend=nextcloud"
+      - "traefik.frontend.rule=Host:nextcloud.${DEFAULT_DOMAIN}"
+      - "traefik.docker.network=frontend-nextcloud"
+      - "traefik.frontend.headers.STSSeconds=15552000"
+      - "com.centurylinklabs.watchtower.enable=true"
 
-  office:
-    image: collabora/code
-    container_name: office
+  nc-db:
+    image: mariadb:latest
+    container_name: nc-db
+    restart: always
+    networks:
+      - backend-nextcloud
+    volumes:
+      - "${PATH_APPDATA}/mariadb:/var/lib/mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${NC_DB_PW_ROOT}
+      - MYSQL_PASSWORD=${NC_DB_PW_NEXTCLOUD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    labels:
+      - "traefik.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin -u $$MYSQL_USER --password=$$MYSQL_PASSWORD ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  nc-office:
+    image: collabora/code:latest
+    container_name: nc-office
     restart: always
     cap_add:
       - MKNOD
     networks:
-      - web
+      - frontend-nextcloud
     expose:
       - "9980"
-    depends_on:
-      - le
+    tty: true
     environment:
-      - domain=nextcloud.jensw.eu
-      - username=<OFFICE_USER>
-      - password=<OFFICE_PASS>
+      - server_name=office.${DEFAULT_DOMAIN}
+      - domain=nextcloud.${DEFAULT_DOMAIN}
+      - username=${NC_OFFICE_USER}
+      - password=${NC_OFFICE_PW}
+    labels:
+      - "traefik.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
 
-  nextcloud:
-    image: nextcloud
-    container_name: nextcloud
+  nc-office-proxy:
+    image: nginx:latest
+    container_name: nc-office-proxy
+    labels:
+      - "traefik.enable=true"
+      #make sure you edit line 3 of configs/collabora-proxy.conf to add this hostname
+      - "traefik.web.frontend.rule=Host:office.${DEFAULT_DOMAIN};"
+      - "traefik.port=80"
+      - "traefik.protocol=http"
+      - "traefik.docker.network=frontend-nextcloud"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.frontend.headers.STSSeconds=15552000"
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: always
     networks:
-      - web
-      - db
+      - frontend-nextcloud
     expose:
       - "80"
-    depends_on:
-      - le
-      - mariadb
-      - office
     volumes:
-      - /opt/appdata/nextcloud:/var/www/html
-      - /media/data/services/nextcloud:/var/www/html/data
+      - ./conf/nc-office-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - nc-office
 
-  mariadb:
-    image: mariadb
-    container_name: mariadb
+#########################
+#       TORRENT         #
+#########################
+  torrent:
+    image: linuxserver/deluge
+    container_name: torrent
     restart: always
     networks:
-      - db
+      - frontend-torrent
+    ports:
+      - "58946:58946"
     volumes:
-      - /opt/appdata/mariadb:/var/lib/mysql
+      - "/media/data/services/torrent/:/running"
+      - "/media/data/media/000. Plex/Nazien:/downloads"
+      - "${PATH_APPDATA}/torrent:/config"
     environment:
-      - MYSQL_ROOT_PASSWORD=<MARIADB_ROOT>
-      - MYSQL_PASSWORD=<MARIADB_NEXTCLOUD>
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
+      - PUID=233
+      - PGID=233
+      - TZ=Europe/Brussels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8112"
+      - "traefik.docker.network=frontend-torrent"
+      - "traefik.web.frontend.rule=Host:torrent.${DEFAULT_DOMAIN};"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.backend=deluge"
+      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #        SAMBA          #
@@ -106,38 +170,90 @@ services:
     image: dperson/samba
     container_name: samba
     restart: always
-    networks: ["samba"]
+    networks:
+      - samba
     ports:
-      - "192.168.1.250:139:139"
-      - "192.168.1.250:445:445"
+      - "${LOCAL_IP}:139:139"
+      - "${LOCAL_IP}:445:445"
     volumes:
       - /media/data/media:/mnt/media
     environment:
       - USERID=233
       - GROUPID=233
-    command: samba.sh -S -u "nas;<SAMBA_NAS>" -u "scanner;<SAMBA_SCANNER>" -s "media;/mnt/media;yes;no;no;nas" -s "scans;/mnt/media/Scans;yes;no;no;scanner"
+    command: samba.sh -S -u "nas;${SAMBA_PW_NAS}" -u "scanner;${SAMBA_PW_SCANNER}" -s "media;/mnt/media;yes;no;no;nas" -s "scans;/mnt/media/Scans;yes;no;no;scanner"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #         PLEX          #
 #########################
   plex:
-    image: plexinc/pms-docker
+    image: plexinc/pms-docker:1.13.2.5154-fd05be322
     container_name: plex
     restart: always
     network_mode: "host"
     volumes:
       - "/media/data/media/000. Plex:/data/media"
       - /media/data/media-plex-optimized/:/data/optimized
-      - /opt/appdata/plex/config:/config
-      - /opt/appdata/plex/transcode:/transcode
+      - "${PATH_APPDATA}/plex/config:/config"
+      - "${PATH_APPDATA}/plex/transcode:/transcode"
     environment:
       - TZ=Europe/Brussels
-      - PLEX_CLAIM=<PLEX_CLAIM>
+      - PLEX_CLAIM=${PLEX_CLAIM}
       - PLEX_UID=233
       - PLEX_GID=233
-      - ADVERTISE_IP="<PLEX_IP>"
+      - ADVERTISE_IP=${PLEX_IP}
+
+#########################
+#        PI-HOLE        #
+#########################
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    restart: always
+    networks:
+      - frontend-pihole
+    ports:
+      - '${LOCAL_IP}:53:53/tcp'
+      - '${LOCAL_IP}:53:53/udp'
+      - '${LOCAL_IP}:8053:80/tcp'
+    volumes:
+      - "${PATH_APPDATA}/pihole/:/etc/pihole/"
+    environment:
+      - ServerIP=${LOCAL_IP} 
+      - TZ='Europe/Brussels'
+      - WEBPASSWORD="${PIHOLE_PW}" 
+      - DNS1=84.200.69.80
+      - DNS2=84.200.70.40
+    restart: always
+    labels:
+       - "traefik.enable=true"
+       - "traefik.docker.network=frontend-pihole"
+       - "traefik.frontend.rule=Host:pihole.${DEFAULT_DOMAIN}, pi.hole"
+       - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+       - "traefik.frontend.priority=1"
+       - "traefik.backend=pihole"
+       - "traefik.port=80"
+       - "com.centurylinklabs.watchtower.enable=true"
+
+#########################
+#        GENERAL        #
+#########################
+volumes:
+  traefik-cert:
 
 networks:
-  web:
-  db:
+  frontend-nextcloud:
+    name: frontend-nextcloud
+
+  backend-nextcloud:
+    name: backend-nextcloud
+
+  frontend-torrent:
+    name: frontend-torrent
+
+  frontend-pihole:
+    name: frontend-pihole
+
   samba:
+    name: samba
