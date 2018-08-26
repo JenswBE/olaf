@@ -32,7 +32,7 @@ NCCALS=( "persoonlijk" "thuis" "werk" )
 # SQL (Read access on Nextcloud DB)
 SQLUSER='nextcloud'
 SQLPASS='<REPLACE ME>'
-SQLCONTAINER='mariadb'
+SQLCONTAINER='nc-db'
 
 
 # ===== cURL webdav helper functions =====
@@ -97,6 +97,7 @@ done
 # Backup files
 cat "${NCBASE}/${NCUSER}/files/IT/JensWillemsens.kdbx" | dav_encrypt_upload_stdin "${BACKUPDIR}/JensWillemsens.kdbx.gpg"
 tar -c -C "${NCBASE}/${NCUSER}/files/Notes/" . | dav_encrypt_upload_stdin "${BACKUPDIR}/notes.tar.gpg"
+tar -c -C "${NCBASE}/${NCUSER}/files/Joplin/" . | dav_encrypt_upload_stdin "${BACKUPDIR}/joplin.tar.gpg"
 
 # Backup documents
 if [ $(date +%u) -eq 1 ]; then
