@@ -36,7 +36,7 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --schedule "0 0 4 * * *" --label-enable --cleanup
+    command: --schedule "0 0 5 * * *" --label-enable --cleanup
     network_mode: bridge
 
 #########################
