@@ -48,7 +48,7 @@ networkd:
 
         [Route]
         Gateway=192.168.1.1
-        Destination=192.168.1.0/24
+        # Destination=192.168.1.0/24
 
     - name: 20-dhcp-wan.network
       contents: |
@@ -56,7 +56,8 @@ networkd:
         Name=wan0
 
         [Network]
-        DHCP=yes
+        # DHCP=yes
+        DHCP = no
 
 update:
   group: "stable"
