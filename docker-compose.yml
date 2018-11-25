@@ -188,7 +188,7 @@ services:
 #         PLEX          #
 #########################
   plex:
-    image: plexinc/pms-docker:1.13.2.5154-fd05be322
+    image: plexinc/pms-docker
     container_name: plex
     restart: always
     network_mode: "host"
@@ -203,6 +203,8 @@ services:
       - PLEX_UID=233
       - PLEX_GID=233
       - ADVERTISE_IP=${PLEX_IP}
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #        PI-HOLE        #
