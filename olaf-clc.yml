@@ -69,6 +69,30 @@ locksmith:
 
 systemd:
   units:
+    - name: nextcloud-cron.service
+      contents: |
+        [Unit]
+        Description=Nextcloud cron.php job
+
+        [Service]
+        ExecStart=/usr/bin/docker exec --user www-data nextcloud php -f cron.php
+
+        [Install]
+        WantedBy=basic.target
+
+    - name: nextcloud-cron.timer
+      contents: |
+        [Unit]
+        Description=Run Nextcloud cron.php every 5 minutes
+
+        [Timer]
+        OnBootSec=5min
+        OnUnitActiveSec=5min
+        Unit=nextcloud-cron.service
+
+        [Install]
+        WantedBy=timers.target
+
     - name: cloudflare-dyndns.service
       contents: |
         [Unit]

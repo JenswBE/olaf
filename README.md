@@ -58,6 +58,20 @@ Use [following instructions](https://docs.docker.com/compose/install/#install-co
 #### Traefik
 Edit file `conf/traefik.toml` and change parameters `domain` and `email`
 
+#### Nextcloud
+Disable following apps:
+- First run wizard 
+
+Install and configure following apps:
+- OnlyOffice
+- Calendar
+- Deck
+- Group folders
+- Notes
+- Polls
+- Quota warning
+- Tasks
+
 #### Deluge
 1. Go through online settings
   - Category Downloads
