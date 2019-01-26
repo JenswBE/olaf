@@ -56,6 +56,7 @@ services:
     depends_on:
       - nc-db
       - nc-office
+      - nc-elasticsearch
     volumes:
       - "${PATH_APPDATA}/nextcloud:/var/www/html"
       - /media/data/services/nextcloud:/var/www/html/data
@@ -115,6 +116,25 @@ services:
     environment:
       - JWT_ENABLED=true
       - JWT_SECRET=${NC_OFFICE_SECRET}
+
+  nc-elasticsearch:
+    build: dockerfiles/elasticsearchingest
+    container_name: nc-elasticsearch
+    networks:
+      - backend-nextcloud
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - "${PATH_APPDATA}/nc-elasticsearch:/usr/share/elasticsearch/data"
+    expose:
+      - "9200"
+    restart: always
 
 #########################
 #       TORRENT         #

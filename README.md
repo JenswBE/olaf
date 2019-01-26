@@ -72,6 +72,9 @@ Install and configure following apps:
 - Quota warning
 - Tasks
 
+#### NC-Elasticsearch
+Copy config `conf/sysctl.conf` to `/etc/sysctl.conf`
+
 #### Deluge
 1. Go through online settings
   - Category Downloads
