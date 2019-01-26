@@ -1,8 +1,6 @@
 # Olaf the Great NAS
 Config for my home NAS
 
-Big thanks to https://github.com/norweeg/self-hosted-docker-server-templates for providing a template for Traefik/Nextcloud/Collabora! 
-
 ## CloudLinux Config
 Change following settings in the config:
 - User settings (name, password and home folder)
@@ -59,9 +57,6 @@ Use [following instructions](https://docs.docker.com/compose/install/#install-co
 
 #### Traefik
 Edit file `conf/traefik.toml` and change parameters `domain` and `email`
-
-#### Collabora Office
-Edit file `conf/nc-office-proxy.conf` and change parameter `server_name` on the third line
 
 #### Deluge
 1. Go through online settings

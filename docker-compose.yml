@@ -93,31 +93,10 @@ services:
       retries: 5
 
   nc-office:
-    image: collabora/code:latest
+    image: onlyoffice/documentserver
     container_name: nc-office
-    restart: always
-    cap_add:
-      - MKNOD
-    networks:
-      - frontend-nextcloud
-    expose:
-      - "9980"
-    tty: true
-    environment:
-      - server_name=office.${DEFAULT_DOMAIN}
-      - domain=nextcloud.${DEFAULT_DOMAIN}
-      - username=${NC_OFFICE_USER}
-      - password=${NC_OFFICE_PW}
-    labels:
-      - "traefik.enable=false"
-      - "com.centurylinklabs.watchtower.enable=true"
-
-  nc-office-proxy:
-    image: nginx:latest
-    container_name: nc-office-proxy
     labels:
       - "traefik.enable=true"
-      #make sure you edit line 3 of configs/collabora-proxy.conf to add this hostname
       - "traefik.web.frontend.rule=Host:office.${DEFAULT_DOMAIN};"
       - "traefik.port=80"
       - "traefik.protocol=http"
@@ -130,10 +109,9 @@ services:
       - frontend-nextcloud
     expose:
       - "80"
-    volumes:
-      - ./conf/nc-office-proxy.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - nc-office
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=${NC_OFFICE_SECRET}
 
 #########################
 #       TORRENT         #
