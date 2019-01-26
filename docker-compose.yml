@@ -23,6 +23,9 @@ services:
       - traefik-cert:/etc/traefik/acme/ 
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - CF_API_EMAIL=${PROXY_CF_API_EMAIL}
+      - CF_API_KEY=${PROXY_CF_API_KEY}
 
 #########################
 #      AUTO-UPDATER     #

@@ -40,6 +40,10 @@ exposedbydefault = false
 email = "admin@jensw.be"
 storage = "/etc/traefik/acme/acme.json"
 entryPoint = "https"
-OnHostRule = true
-[acme.httpChallenge]
-entryPoint = "http"
+  [acme.dnsChallenge]
+    provider = "cloudflare"
+    delayBeforeCheck = 0
+
+[[acme.domains]]
+  main = "*.jensw.eu"
+  sans = ["jensw.eu"]
