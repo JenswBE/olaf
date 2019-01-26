@@ -40,15 +40,15 @@ networkd:
         Name=lan0
 
         [Network]
-        DNS=8.8.8.8
-        DNS=8.8.4.4
+        DNS=84.200.69.80
+        DNS=84.200.70.40
 
         [Address]
         Address=192.168.1.250
 
         [Route]
         Gateway=192.168.1.1
-        Destination=192.168.1.0/24
+        # Destination=192.168.1.0/24
 
     - name: 20-dhcp-wan.network
       contents: |
@@ -56,7 +56,8 @@ networkd:
         Name=wan0
 
         [Network]
-        DHCP=yes
+        # DHCP=yes
+        DHCP = no
 
 update:
   group: "stable"
