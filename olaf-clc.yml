@@ -69,6 +69,18 @@ locksmith:
 
 systemd:
   units:
+    - name: unit-fail-mail@.service
+      contents: |
+        [Unit]
+        Description=Unit Fail Mailer Service
+        After=network.target
+
+        [Service]
+        Type=simple
+        ExecStart=/opt/bin/systemd-mailjet %I
+        EnvironmentFile=/opt/conf/systemd-mailjet.conf
+        User=systemd-mailjet
+
     - name: nextcloud-cron.service
       contents: |
         [Unit]
@@ -76,9 +88,6 @@ systemd:
 
         [Service]
         ExecStart=/usr/bin/docker exec --user www-data nextcloud php -f cron.php
-
-        [Install]
-        WantedBy=basic.target
 
     - name: nextcloud-cron.timer
       contents: |
@@ -92,18 +101,6 @@ systemd:
 
         [Install]
         WantedBy=timers.target
-
-    - name: unit-fail-mail@.service
-      contents: |
-        [Unit]
-        Description=Unit Fail Mailer Service
-        After=network.target
-
-        [Service]
-        Type=simple
-        ExecStart=/opt/bin/systemd-mailjet %I
-        EnvironmentFile=/opt/conf/systemd-mailjet.conf
-        User=systemd-mailjet
 
     - name: cloudflare-dyndns.service
       contents: |
@@ -126,7 +123,7 @@ systemd:
         OnCalendar=*:0/20
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=timers.target
 
     - name: btrfs-snapshot.service
       contents: |
@@ -148,7 +145,7 @@ systemd:
         OnCalendar=hourly
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=timers.target
 
     - name: backup-nextcloud.service
       contents: |
@@ -171,7 +168,7 @@ systemd:
         Persistent=true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=timers.target
 
     - name: backup-vps.service
       contents: |
@@ -195,7 +192,7 @@ systemd:
         Persistent=true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=timers.target
 
     - name: btrfs-scrub.service
       contents: |
@@ -218,7 +215,7 @@ systemd:
         Persistent=true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=timers.target
 
     - name: media-data.mount
       enable: true
