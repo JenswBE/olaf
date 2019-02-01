@@ -71,6 +71,9 @@ Install and configure following apps:
 - Polls
 - Quota warning
 - Tasks
+- Full text search 
+- Full text search - Elasticsearch Platform
+- Full text search - Files
 
 #### NC-Elasticsearch
 Copy config `conf/sysctl.conf` to `/etc/sysctl.conf`
