@@ -208,38 +208,6 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
-#        PI-HOLE        #
-#########################
-  pihole:
-    image: pihole/pihole:latest
-    container_name: pihole
-    restart: always
-    networks:
-      - frontend-pihole
-    ports:
-      - '${LOCAL_IP}:53:53/tcp'
-      - '${LOCAL_IP}:53:53/udp'
-      - '${LOCAL_IP}:8053:80/tcp'
-    volumes:
-      - "${PATH_APPDATA}/pihole/:/etc/pihole/"
-    environment:
-      - ServerIP=${LOCAL_IP} 
-      - TZ='Europe/Brussels'
-      - WEBPASSWORD="${PIHOLE_PW}" 
-      - DNS1=84.200.69.80
-      - DNS2=84.200.70.40
-    restart: always
-    labels:
-       - "traefik.enable=true"
-       - "traefik.docker.network=frontend-pihole"
-       - "traefik.frontend.rule=Host:pihole.${DEFAULT_DOMAIN}, pi.hole"
-       - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
-       - "traefik.frontend.priority=1"
-       - "traefik.backend=pihole"
-       - "traefik.port=80"
-       - "com.centurylinklabs.watchtower.enable=true"
-
-#########################
 #        GENERAL        #
 #########################
 volumes:
@@ -254,9 +222,6 @@ networks:
 
   frontend-torrent:
     name: frontend-torrent
-
-  frontend-pihole:
-    name: frontend-pihole
 
   samba:
     name: samba
