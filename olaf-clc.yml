@@ -93,7 +93,7 @@ systemd:
         [Install]
         WantedBy=timers.target
 
-    - name: cloudflare-dyndns.service
+    - name: unit-fail-mail@.service
       contents: |
         [Unit]
         Description=Unit Fail Mailer Service
