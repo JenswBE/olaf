@@ -76,7 +76,7 @@ Install and configure following apps:
 - Full text search - Files
 
 #### NC-Elasticsearch
-Copy config `conf/sysctl.conf` to `/etc/sysctl.conf`
+Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-count.conf`
 
 #### Deluge
 1. Go through online settings
