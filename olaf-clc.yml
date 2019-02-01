@@ -81,6 +81,29 @@ systemd:
         EnvironmentFile=/opt/conf/systemd-mailjet.conf
         User=systemd-mailjet
 
+    - name: nextcloud-fulltextsearch-index.service
+      contents: |
+        [Unit]
+        Description=Nextcloud FullTextSearch index job
+
+        [Service]
+        Type=simple
+        TimeoutStartSec="infinity"
+        ExecStartPre=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:index
+        ExecStart=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:live
+
+    - name: nextcloud-fulltextsearch-index.timer
+      contents: |
+        [Unit]
+        Description=Start Nextcloud FullTextSearch index job 5 mins after boot
+
+        [Timer]
+        OnBootSec=5min
+        Unit=nextcloud-fulltextsearch-index.service
+
+        [Install]
+        WantedBy=timers.target
+
     - name: nextcloud-cron.service
       contents: |
         [Unit]
