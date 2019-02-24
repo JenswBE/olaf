@@ -74,6 +74,8 @@ Install and configure following apps:
 - Full text search 
 - Full text search - Elasticsearch Platform
 - Full text search - Files
+- Preview generator
+- Unsplash
 
 #### NC-Elasticsearch
 Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-count.conf`

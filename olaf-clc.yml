@@ -121,7 +121,26 @@ systemd:
         [Timer]
         OnBootSec=5min
         OnUnitActiveSec=5min
-        Unit=nextcloud-cron.service
+
+        [Install]
+        WantedBy=timers.target
+
+    - name: nextcloud-preview-generator.service
+      contents: |
+        [Unit]
+        Description=Nextcloud generate previews
+
+        [Service]
+        ExecStart=/usr/bin/docker exec --user www-data nextcloud php occ preview:pre-generate
+
+    - name: nextcloud-preview-generator.timer
+      contents: |
+        [Unit]
+        Description=Nextcloud generate previews every 10 minutes
+
+        [Timer]
+        OnBootSec=5min
+        OnUnitActiveSec=10min
 
         [Install]
         WantedBy=timers.target
@@ -141,10 +160,11 @@ systemd:
       enable: true
       contents: |
         [Unit]
-        Description=Send IP update every 20 mins
+        Description=Send IP update every 15 mins
 
         [Timer]
-        OnCalendar=*:0/20
+        OnBootSec=2min
+	OnUnitActiveSec=15min
 
         [Install]
         WantedBy=timers.target
