@@ -84,14 +84,14 @@ systemd:
     - name: nextcloud-fulltextsearch-index.service
       contents: |
         [Unit]
-        Description=Nextcloud FullTextSearch index job
+	Description=Nextcloud FullTextSearch index job
 
-        [Service]
-        Type=simple
-        TimeoutStartSec="infinity"
-        ExecStartPre=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
-        ExecStartPre=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:index
-        ExecStart=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:live
+	[Service]
+	Type=simple
+	TimeoutSec=infinity
+	ExecStartPre=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
+	ExecStart=/usr/bin/docker exec --user www-data nextcloud /bin/bash -c "php occ fulltextsearch:index && php occ fulltextsearch:live"
+	ExecStop=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
 
     - name: nextcloud-fulltextsearch-index.timer
       contents: |
