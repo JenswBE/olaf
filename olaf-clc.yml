@@ -191,28 +191,28 @@ systemd:
         [Install]
         WantedBy=timers.target
 
-    - name: backup-nextcloud.service
+    - name: firefly-cron.service
       contents: |
         [Unit]
-        Description=Backup Nextcloud every night
+        Description=Firefly III's cron job
         OnFailure=unit-fail-mail@%n.service
 
         [Service]
         Type=simple
-        ExecStart=/opt/bin/backup-nextcloud
+        ExecStart=/usr/bin/docker exec --user www-data firefly php artisan firefly:cron
 
-    - name: backup-nextcloud.timer
+    - name: firefly-cron.timer
       enable: true
       contents: |
         [Unit]
-        Description=Backup Nextcloud every night
+	Description=Runs Firefly III's cron command every night
 
-        [Timer]
-        OnCalendar=*-*-* 04:00:00
-        Persistent=true
+	[Timer]
+	OnCalendar=*-*-* 01:00:00
+	Persistent=true
 
-        [Install]
-        WantedBy=timers.target
+	[Install]
+	WantedBy=timers.target
 
     - name: backup-vps.service
       contents: |
@@ -233,6 +233,29 @@ systemd:
 
         [Timer]
         OnCalendar=*-*-* 03:00:00
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
+
+    - name: backup-nextcloud.service
+      contents: |
+        [Unit]
+        Description=Backup Nextcloud every night
+        OnFailure=unit-fail-mail@%n.service
+
+        [Service]
+        Type=simple
+        ExecStart=/opt/bin/backup-nextcloud
+
+    - name: backup-nextcloud.timer
+      enable: true
+      contents: |
+        [Unit]
+        Description=Backup Nextcloud every night
+
+        [Timer]
+        OnCalendar=*-*-* 04:00:00
         Persistent=true
 
         [Install]
