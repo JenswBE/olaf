@@ -81,7 +81,7 @@ services:
     networks:
       - backend-nextcloud
     volumes:
-      - "${PATH_APPDATA}/mariadb:/var/lib/mysql"
+      - "${PATH_APPDATA}/nc-db:/var/lib/mysql"
     environment:
       - MYSQL_ROOT_PASSWORD=${NC_DB_PW_ROOT}
       - MYSQL_PASSWORD=${NC_DB_PW_NEXTCLOUD}
