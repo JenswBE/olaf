@@ -16,7 +16,6 @@ services:
     networks:
       - frontend-nextcloud
       - frontend-torrent
-      - frontend-firefly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./conf/traefik.toml:/traefik.toml
@@ -206,68 +205,6 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
-#        FINANCE        #
-#########################
-  firefly:
-    image: jc5x/firefly-iii
-    container_name: firefly
-    restart: always
-    networks:
-      - frontend-firefly
-      - backend-firefly
-    depends_on:
-      - ff-db
-    volumes:
-      - "${PATH_APPDATA}/firefly/export:/var/www/firefly-iii/storage/export"
-      - "${PATH_APPDATA}/firefly/upload:/var/www/firefly-iii/storage/upload"
-    environment:
-      - FF_DB_HOST=ff-db
-      - FF_DB_NAME=firefly
-      - FF_DB_USER=firefly
-      - FF_DB_PASSWORD=${FF_DB_PW_FIREFLY}
-      - FF_APP_KEY=${FIREFLY_APP_KEY}
-      - FF_APP_ENV=local
-      - APP_URL=https://finance.${DEFAULT_DOMAIN}
-      - TRUSTED_PROXIES=**
-      - MAIL_DRIVER=smtp
-      - MAIL_HOST=${FIREFLY_MAIL_HOST}
-      - MAIL_PORT=587
-      - MAIL_FROM=${FIREFLY_MAIL_USER}
-      - MAIL_USERNAME=${FIREFLY_MAIL_USER}
-      - MAIL_PASSWORD=${FIREFLY_MAIL_PASSWORD}
-      - MAIL_ENCRYPTION=TLS
-    labels:
-      - "traefik.enable=true"
-      - "traefik.port=80"
-      - "traefik.backend=firefly"
-      - "traefik.frontend.rule=Host:finance.${DEFAULT_DOMAIN}"
-      - "traefik.docker.network=frontend-firefly"
-      - "traefik.frontend.headers.STSSeconds=15552000"
-      - "com.centurylinklabs.watchtower.enable=true"
-
-  ff-db:
-    image: mariadb:latest
-    container_name: ff-db
-    restart: always
-    networks:
-      - backend-firefly
-    volumes:
-      - "${PATH_APPDATA}/ff-db:/var/lib/mysql"
-    environment:
-      - MYSQL_ROOT_PASSWORD=${FF_DB_PW_ROOT}
-      - MYSQL_PASSWORD=${FF_DB_PW_FIREFLY}
-      - MYSQL_DATABASE=firefly
-      - MYSQL_USER=firefly
-    labels:
-      - "traefik.enable=false"
-      - "com.centurylinklabs.watchtower.enable=true"
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin -u $$MYSQL_USER --password=$$MYSQL_PASSWORD ping || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-#########################
 #        GENERAL        #
 #########################
 volumes:
@@ -285,10 +222,4 @@ networks:
 
   samba:
     name: samba
-
-  frontend-firefly:
-    name: frontend-firefly
-
-  backend-firefly:
-    name: backend-firefly
 
