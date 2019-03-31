@@ -191,29 +191,6 @@ systemd:
         [Install]
         WantedBy=timers.target
 
-    - name: firefly-cron.service
-      contents: |
-        [Unit]
-        Description=Firefly III's cron job
-        OnFailure=unit-fail-mail@%n.service
-
-        [Service]
-        Type=simple
-        ExecStart=/usr/bin/docker exec --user www-data firefly php artisan firefly:cron
-
-    - name: firefly-cron.timer
-      enable: true
-      contents: |
-        [Unit]
-	Description=Runs Firefly III's cron command every night
-
-	[Timer]
-	OnCalendar=*-*-* 01:00:00
-	Persistent=true
-
-	[Install]
-	WantedBy=timers.target
-
     - name: backup-vps.service
       contents: |
         [Unit]
