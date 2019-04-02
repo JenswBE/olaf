@@ -38,7 +38,7 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --schedule "0 0 5 * * *" --label-enable --cleanup
+    command: --schedule "0 0 4 * * *" --label-enable --cleanup
     network_mode: bridge
 
 #########################
@@ -82,6 +82,7 @@ services:
       - backup-nc-db
     volumes:
       - "${PATH_APPDATA}/nc-db:/var/lib/mysql"
+      - nc-db-dump:/backup
     environment:
       - MYSQL_ROOT_PASSWORD=${NC_DB_PW_ROOT}
       - MYSQL_PASSWORD=${NC_DB_PW_NEXTCLOUD}
@@ -222,12 +223,36 @@ services:
     environment:
       # Disable cron
       - CRON_TIME="#"
+    labels:
+      - "traefik.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  borgmatic:
+    image: b3vis/borgmatic
+    container_name: borgmatic
+    restart: always
+    volumes:
+      # Backup locations
+      - nc-db-dump:/mnt/source/nextcloud/dbdump:ro
+      - nc-calcardbackup:/mnt/source/nextcloud/calcardbackup:ro
+      - /media/data/services/nextcloud/jens/files/Documenten:/mnt/source/nextcloud/files/jens/Documenten:ro
+      # Config and cache
+      - ./conf/borgmatic/borgmatic.d:/etc/borgmatic.d
+      - ./conf/borgmatic/ssh:/root/.ssh
+      - "${PATH_APPDATA}/borgmatic/config:/root/.config/borg"
+      - "${PATH_APPDATA}/borgmatic/cache:/root/.cache/borg"
+    environment:
+      - TZ=Europe/Brussels
+    labels:
+      - "traefik.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #        GENERAL        #
 #########################
 volumes:
   traefik-cert:
+  nc-db-dump:
   nc-calcardbackup:
 
 networks:

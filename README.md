@@ -50,6 +50,13 @@ Edit file `conf/traefik.toml` and change parameters `domain` and `email`
 Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-count.conf`
 
 #### After up
+##### Borgmatic
+1. Execute `docker exec -it borgmatic sh -c "ssh <REMOTE_USER>@<REMOTE_URL>"`, check and accept the host key
+2. Execute `ssh-keygen` and create a new ssh key with blank passphrase in `config/borgmatic/ssh`
+3. Add public key to allowed ssh keys at remote host (depending on service)
+4. Copy from template and edit `config/borgmatic/borgmatic.d/config.yaml`
+5. Init repo if required with `docker exec borgmatic sh -c "borgmatic --init --encryption repokey-blake2"`
+
 ##### Nextcloud
 Disable following apps:
 - First run wizard 
@@ -102,3 +109,29 @@ Go to https://app.plex.tv to setup following libraries:
   - /data/media/Photos
 - Muziek
   - /data/media/Music
+
+## Scheduled jobs
+### One shot
+- 5 min after boot: Nextcloud FullTextSearch index job (olaf-clc.yml => nextcloud-fulltextsearch-index.timer)
+
+### Continuous
+- Every 5 mins: Nextcloud cron.php (olaf-clc.yml => nextcloud-cron.timer)
+- Every 10 mins: Nextcloud generate previews (olaf-clc.yml => nextcloud-preview-generator.timer)
+- Every 15 mins: Update IP in DNS (olaf-clc.yml => cloudflare-dyndns.timer)
+- Every hour: Take BTRFS snapshot (olaf-clc.yml => btrfs-snapshot.timer)
+
+### 01:00 Daily application jobs
+- None
+
+### 02:00 Prepare backup
+- Dump Nextcloud DB (olaf-clc.yml => dump-nc-db.timer)
+- Dump Nextcloud calendars and contacts (olaf-clc.yml => backup-nc-calcardbackup.timer)
+
+### 03:00 Perform backup
+- Run Borgmatic (config/borgmatic/borgmatic.d/crontab.txt)
+
+### 04:00 Perform application updates
+- Run Watchtower (docker-compose.yml)
+
+### 05:00 System tasks
+- Update and restart (locksmith)
