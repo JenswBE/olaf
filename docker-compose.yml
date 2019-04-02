@@ -117,7 +117,7 @@ services:
       - JWT_SECRET=${NC_OFFICE_SECRET}
 
   nc-elasticsearch:
-    build: dockerfiles/elasticsearchingest
+    build: build/elasticsearchingest
     container_name: nc-elasticsearch
     networks:
       - backend-nextcloud
