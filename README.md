@@ -52,10 +52,13 @@ Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-c
 #### After up
 ##### Borgmatic
 1. Execute `docker exec -it borgmatic sh -c "ssh <REMOTE_USER>@<REMOTE_URL>"`, check and accept the host key
-2. Execute `ssh-keygen` and create a new ssh key with blank passphrase in `config/borgmatic/ssh`
+2. Execute `ssh-keygen` and create a new ssh key with blank passphrase in `conf/borgmatic/ssh`
 3. Add public key to allowed ssh keys at remote host (depending on service)
-4. Copy from template and edit `config/borgmatic/borgmatic.d/config.yaml`
-5. Init repo if required with `docker exec borgmatic sh -c "borgmatic --init --encryption repokey-blake2"`
+4. Copy from template and edit `conf/borgmatic/borgmatic.d/config.yaml`
+5. Change permissions with `chmod 600 config.yaml`
+6. Init repo if required with `docker exec borgmatic sh -c "borgmatic --init --encryption repokey-blake2"`
+7. Perform a backup to test the setup with `docker exec borgmatic sh -c "borgmatic --verbosity 1"`
+8. Optional: Backup your repo key file with `docker exec borgmatic sh -c "BORG_RSH=\"ssh -i /root/.ssh/<NAME_OF_SSH_KEY>\" borg key export --qr-html <FULL_REPO_NAME> /root/.ssh/repokey.html"`. Your file is available at `conf/borgmatic/ssh/repokey.html`.
 
 ##### Nextcloud
 Disable following apps:
@@ -128,7 +131,7 @@ Go to https://app.plex.tv to setup following libraries:
 - Dump Nextcloud calendars and contacts (olaf-clc.yml => backup-nc-calcardbackup.timer)
 
 ### 03:00 Perform backup
-- Run Borgmatic (config/borgmatic/borgmatic.d/crontab.txt)
+- Run Borgmatic (conf/borgmatic/borgmatic.d/crontab.txt)
 
 ### 04:00 Perform application updates
 - Run Watchtower (docker-compose.yml)
