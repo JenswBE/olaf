@@ -228,6 +228,7 @@ services:
 #########################
 volumes:
   traefik-cert:
+  nc-calcardbackup:
 
 networks:
   frontend-nextcloud:
