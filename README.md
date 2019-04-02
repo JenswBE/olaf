@@ -1,64 +1,56 @@
 # Olaf the Great NAS
 Config for my home NAS
 
-## CloudLinux Config
-Change following settings in the config:
-- User settings (name, password and home folder)
-- CloudFlare DynDNS (email, token, zone name and domain name)
-- VPS backup user
-- Mounts
-- ...
+## Setup
+### Install CoreOS
+1. Download the latest version of the [config transpiler](https://github.com/coreos/container-linux-config-transpiler/)
+2. Complete config `olaf-clc.yml`
+3. Transpile the config using `ct -strict < olaf-clc.yml > olaf-clc.json`
+4. Install CoreOS using `coreos-install -d /dev/sdX -i olaf-clc.json`
+5. Reboot
+6. Change hostname with `sudo hostnamectl set-hostname olaf`
+7. Create opt folders with `sudo mkdir -p /opt/bin /opt/config`
 
-## Post installation
+### Docker Compose
+Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at `/opt/bin/docker-compose`
 
-### Install binaries
+### Basic setup
+1. Clone this repo with `git clone https://github.com/JensWillemsens/olaf.git`
+2. Copy file `.env.template` to `.env`
+3. Change permissions with `chmod 600 .env`
+4. Complete the file
+5. Create a symbolic link to `.env` using `sudo ln -s /<ABSOLUTE_PATH>/.env /opt/docker-env`
 
-#### Systemd Mailjet
+### Systemd Mailjet
 Send mail on failed unit. See https://github.com/JensWillemsens/systemd-mailjet for more info.
 1. Create a new user with `sudo useradd -r systemd-mailjet`
-2. Copy executable `bin/systemd-mailjet` to `/opt/bin/systemd-mailjet` and make executable
-3. Create a new folder `sudo mkdir /opt/conf`
+2. Copy executable `bin/systemd-mailjet` to `/opt/bin/systemd-mailjet`
+3. Make executable using `sudo chmod +x /opt/bin/systemd-mailjet`
 4. Complete file `conf/systemd-mailjet.conf` and copy to `/opt/conf/systemd-mailjet.conf`
 5. Make file readonly by owner `sudo chmod 400 /opt/conf/systemd-mailjet.conf`
 6. Set correct owner `sudo chown systemd-mailjet:systemd-mailjet /opt/conf/systemd-mailjet.conf`
 
-#### Backup Nextcloud
+### Backup Nextcloud
 1. Copy script `bin/backup-nextcloud` to `/opt/bin/backup-nextcloud` and make executable
 2. Edit script and add correct information below heading OPTIONS
 3. Set correct permissions `sudo chmod 500 /opt/bin/backup-nextcloud`
 
-#### Backup VPS
-1. Setup receiver
-  1. Create a new user with `sudo useradd -r <RECV_USER>`
-  2. Create new SSH key pair with `sudo -u <RECV_USER> ssh-keygen`
-  3. Send the public key `~/.ssh/id_rsa.pub` to the sender through SCP
-2. Setup sender
-  1. Create a new user with `sudo useradd -rR /var/www/html <BACKUP_USER>`
-  2. Add new user to ssh allowed group (if setup) with `sudo usermod -a -G ssh_users <BACKUP_USER>`
-  3. Create new SSH key pair with `sudo -u <BACKUP_USER> ssh-keygen`
-  4. Append the public key of step 1.3 (RECEIVER) to the file `~/.ssh/authorized_keys`
-  5. Create a new SQL user with `GRANT SELECT, LOCK TABLES, SHOW VIEW ON *.* TO '<SQL_USER>'@'localhost' IDENTIFIED BY '<SQL_PASS>';`
-  6. Flush privileges with `FLUSH PRIVILEGES;`
-  7. Test if you can dump the database with `mysqldump -A -u <SQL_USER> -p<SQL_PASS>`
-3. Verify on the RECEIVER if you can connect without password through SSH
-4. Copy script `bin/backup-vps` to `/opt/bin/backup-vps` and make executable
-5. Edit script and add correct information below heading OPTIONS
-6. Set correct permissions `sudo chmod 500 /opt/bin/backup-vps`
-
-#### Docker Compose
-Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at `/opt/bin/docker-compose`
-
-#### BTRFS snapshots
+### BTRFS snapshots
 1. Download the [BTRFS snap script](https://github.com/jf647/btrfs-snap) to `/opt/bin/btrfs-snap` and make executable
 2. Copy script `bin/btrfs-snapshot` to `/opt/bin/btrfs-snapshot` and make executable
 3. Set correct permissions `sudo chmod 544 /opt/bin/btrfs-snap /opt/bin/btrfs-snapshot`
 
-### Setup containers
+### Containers
+#### Before up
 
-#### Traefik
+##### Traefik
 Edit file `conf/traefik.toml` and change parameters `domain` and `email`
 
-#### Nextcloud
+##### NC-Elasticsearch
+Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-count.conf`
+
+#### After up
+##### Nextcloud
 Disable following apps:
 - First run wizard 
 
@@ -77,10 +69,7 @@ Install and configure following apps:
 - Preview generator
 - Unsplash
 
-#### NC-Elasticsearch
-Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-count.conf`
-
-#### Deluge
+##### Deluge
 1. Go through online settings
   - Category Downloads
     - Set "Download to" to `/running`
