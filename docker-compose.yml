@@ -79,6 +79,7 @@ services:
     restart: always
     networks:
       - backend-nextcloud
+      - backup-nc-db
     volumes:
       - "${PATH_APPDATA}/nc-db:/var/lib/mysql"
     environment:
@@ -205,6 +206,24 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
+#        BACKUP         #
+#########################
+  nc-calcardbackup:
+    image: waja/calcardbackup
+    container_name: nc-calcardbackup
+    restart: always
+    depends_on:
+      - nc-db
+    networks:
+      - backup-nc-db
+    volumes:
+      - "${PATH_APPDATA}/nextcloud/config:/nextcloud/config"
+      - nc-calcardbackup:/backup
+    environment:
+      # Disable cron
+      - CRON_TIME="#"
+
+#########################
 #        GENERAL        #
 #########################
 volumes:
@@ -216,6 +235,9 @@ networks:
 
   backend-nextcloud:
     name: backend-nextcloud
+
+  backup-nc-db:
+    name: backup-nc-db
 
   frontend-torrent:
     name: frontend-torrent

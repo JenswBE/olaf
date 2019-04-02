@@ -93,6 +93,7 @@ systemd:
 	ExecStop=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
 
     - name: nextcloud-fulltextsearch-index.timer
+      enabled: true
       contents: |
         [Unit]
         Description=Start Nextcloud FullTextSearch index job 5 mins after boot
@@ -113,6 +114,7 @@ systemd:
         ExecStart=/usr/bin/docker exec --user www-data nextcloud php -f cron.php
 
     - name: nextcloud-cron.timer
+      enabled: true
       contents: |
         [Unit]
         Description=Run Nextcloud cron.php every 5 minutes
@@ -133,6 +135,7 @@ systemd:
         ExecStart=/usr/bin/docker exec --user www-data nextcloud php occ preview:pre-generate
 
     - name: nextcloud-preview-generator.timer
+      enabled: true
       contents: |
         [Unit]
         Description=Nextcloud generate previews every 10 minutes
@@ -156,7 +159,7 @@ systemd:
         ExecStart=/usr/bin/docker run --name dyndns --rm -e CF_EMAIL=acc.cloudflare@jensw.be -e CF_TOKEN=<CLOUDFLARE_TOKEN> -e CF_ZONE_NAME=jensw.eu -e CF_DOMAIN_NAME=jensw.eu ellerbrock/alpine-cloudflare-dyndns
 
     - name: cloudflare-dyndns.timer
-      enable: true
+      enabled: true
       contents: |
         [Unit]
         Description=Send IP update every 15 mins
@@ -179,7 +182,7 @@ systemd:
         ExecStart=/opt/bin/btrfs-snapshot
 
     - name: btrfs-snapshot.timer
-      enable: true
+      enabled: true
       contents: |
         [Unit]
         Description=Check for BTRFS snapshot every hour
@@ -190,24 +193,23 @@ systemd:
         [Install]
         WantedBy=timers.target
 
-    - name: backup-nextcloud.service
+    - name: backup-nc-calcardbackup.service
       contents: |
         [Unit]
-        Description=Backup Nextcloud every night
+        Description=Backup all Nextcloud calendars and contacts
         OnFailure=unit-fail-mail@%n.service
 
         [Service]
-        Type=simple
-        ExecStart=/opt/bin/backup-nextcloud
+        ExecStart=/usr/bin/docker exec nc-calcardbackup sh -c "/opt/calcardbackup/calcardbackup /nextcloud/ --output /backup/ -i -x -d '_overwrite'"
 
-    - name: backup-nextcloud.timer
-      enable: true
+    - name: backup-nc-calcardbackup.timer
+      enabled: true
       contents: |
         [Unit]
-        Description=Backup Nextcloud every night
+        Description=Backup all Nextcloud calendars and contacts at 01h00
 
         [Timer]
-        OnCalendar=*-*-* 04:00:00
+        OnCalendar=*-*-* 01:00:00
         Persistent=true
 
         [Install]
@@ -224,7 +226,7 @@ systemd:
         ExecStart=/usr/sbin/btrfs scrub start -Bd /media/data
 
     - name: btrfs-scrub.timer
-      enable: true
+      enabled: true
       contents: |
         [Unit]
         Description=Scrub BTRFS data drives every 1st of the month
@@ -237,7 +239,7 @@ systemd:
         WantedBy=timers.target
 
     - name: media-data.mount
-      enable: true
+      enabled: true
       contents: |
         [Mount]
         What=/dev/disk/by-uuid/c44fbbe8-f708-4bbd-9dfc-8a0fa15fc956
@@ -249,7 +251,7 @@ systemd:
         WantedBy=multi-user.target
 
     - name: media-backup.mount
-      enable: true
+      enabled: true
       contents: |
         [Mount]
         What=/dev/disk/by-uuid/c44fbbe8-f708-4bbd-9dfc-8a0fa15fc956
