@@ -136,5 +136,6 @@ Go to https://app.plex.tv to setup following libraries:
 ### 04:00 Perform application updates
 - Run Watchtower (docker-compose.yml)
 
-### 05:00 System tasks
-- Update and restart (locksmith)
+### System tasks
+- 05:00 Update and restart (locksmith)
+- 06:00 First of month: Scrub BTRFS filesystem (olaf-clc.yml => btrfs-scrub.timer)
