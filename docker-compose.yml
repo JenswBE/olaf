@@ -241,6 +241,7 @@ services:
       - ./conf/borgmatic/ssh:/root/.ssh
       - "${PATH_APPDATA}/borgmatic/config:/root/.config/borg"
       - "${PATH_APPDATA}/borgmatic/cache:/root/.cache/borg"
+      - "${PATH_APPDATA}/borgmatic/restore:/mnt/restore"
     environment:
       - TZ=Europe/Brussels
     labels:
