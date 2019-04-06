@@ -63,8 +63,8 @@ update:
 
 locksmith:
   reboot_strategy: "reboot"
-  window_start: "Sun 2:00"
-  window_length: "2h"
+  window_start: "Sun 5:00"
+  window_length: "1h"
 
 systemd:
   units:
@@ -83,14 +83,14 @@ systemd:
     - name: nextcloud-fulltextsearch-index.service
       contents: |
         [Unit]
-	Description=Nextcloud FullTextSearch index job
+        Description=Nextcloud FullTextSearch index job
 
-	[Service]
-	Type=simple
-	TimeoutSec=infinity
-	ExecStartPre=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
-	ExecStart=/usr/bin/docker exec --user www-data nextcloud /bin/bash -c "php occ fulltextsearch:index && php occ fulltextsearch:live"
-	ExecStop=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
+        [Service]
+        Type=simple
+        TimeoutSec=infinity
+        ExecStartPre=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
+        ExecStart=/usr/bin/docker exec --user www-data nextcloud /bin/bash -c "php occ fulltextsearch:index && php occ fulltextsearch:live"
+        ExecStop=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
 
     - name: nextcloud-fulltextsearch-index.timer
       enabled: true
@@ -166,7 +166,7 @@ systemd:
 
         [Timer]
         OnBootSec=2min
-	OnUnitActiveSec=15min
+        OnUnitActiveSec=15min
 
         [Install]
         WantedBy=timers.target
@@ -255,7 +255,7 @@ systemd:
         Description=Scrub BTRFS data drives every 1st of the month
 
         [Timer]
-        OnCalendar=*-*-01 05:00:00
+        OnCalendar=*-*-01 06:00:00
         Persistent=true
 
         [Install]
