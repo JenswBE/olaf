@@ -88,6 +88,8 @@ systemd:
         [Service]
         Type=simple
         TimeoutSec=infinity
+        Restart=always
+        RestartSec=3
         ExecStartPre=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
         ExecStart=/usr/bin/docker exec --user www-data nextcloud /bin/bash -c "php occ fulltextsearch:index && php occ fulltextsearch:live"
         ExecStop=/usr/bin/docker exec --user www-data nextcloud php occ fulltextsearch:stop
