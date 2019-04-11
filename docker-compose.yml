@@ -236,6 +236,9 @@ services:
       - nc-db-dump:/mnt/source/nextcloud/dbdump:ro
       - nc-calcardbackup:/mnt/source/nextcloud/calcardbackup:ro
       - /media/data/services/nextcloud/jens/files/Documenten:/mnt/source/nextcloud/files/jens/Documenten:ro
+      - /media/data/services/nextcloud/jens/files/Joplin:/mnt/source/nextcloud/files/jens/Joplin:ro
+      - /media/data/services/nextcloud/jens/files/IT:/mnt/source/nextcloud/files/jens/IT:ro
+      - /media/data/services/nextcloud/jens/files/Work:/mnt/source/nextcloud/files/jens/Work:ro
       # Config and cache
       - ./conf/borgmatic/borgmatic.d:/etc/borgmatic.d
       - ./conf/borgmatic/ssh:/root/.ssh
