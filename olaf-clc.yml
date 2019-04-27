@@ -158,7 +158,7 @@ systemd:
         [Service]
         Type=oneshot
         ExecStart=/usr/bin/docker pull ellerbrock/alpine-cloudflare-dyndns
-        ExecStart=/usr/bin/docker run --name dyndns --rm -e CF_EMAIL=acc.cloudflare@jensw.be -e CF_TOKEN=<CLOUDFLARE_TOKEN> -e CF_ZONE_NAME=jensw.eu -e CF_DOMAIN_NAME=jensw.eu ellerbrock/alpine-cloudflare-dyndns
+        ExecStart=/usr/bin/docker run --name dyndns --rm -e CF_EMAIL=ext.cloudflare@jensw.be -e CF_TOKEN=<CLOUDFLARE_TOKEN> -e CF_ZONE_NAME=jensw.eu -e CF_DOMAIN_NAME=jensw.eu ellerbrock/alpine-cloudflare-dyndns
 
     - name: cloudflare-dyndns.timer
       enabled: true
