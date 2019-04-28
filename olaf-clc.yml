@@ -80,6 +80,20 @@ systemd:
         EnvironmentFile=/opt/conf/systemd-mailjet.conf
         User=systemd-mailjet
 
+    - name: poke-docker.service
+      enabled: true
+      contents: |
+        [Unit]
+        After=default.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/docker version
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=default.target
+
     - name: nextcloud-fulltextsearch-index.service
       contents: |
         [Unit]
