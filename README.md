@@ -15,14 +15,14 @@ Config for my home NAS
 Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at `/opt/bin/docker-compose`
 
 ### Basic setup
-1. Clone this repo with `git clone https://github.com/JensWillemsens/olaf.git`
+1. Clone this repo with `git clone https://github.com/JenswBE/olaf.git`
 2. Copy file `.env.template` to `.env`
 3. Change permissions with `chmod 600 .env`
 4. Complete the file
 5. Create a symbolic link to `.env` using `sudo ln -s /<ABSOLUTE_PATH>/.env /opt/docker-env`
 
 ### Systemd Mailjet
-Send mail on failed unit. See https://github.com/JensWillemsens/systemd-mailjet for more info.
+Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/JenswBE/systemd-mailjet) for more info.
 1. Create a new user with `sudo useradd -r systemd-mailjet`
 2. Copy executable `bin/systemd-mailjet` to `/opt/bin/systemd-mailjet`
 3. Make executable using `sudo chmod +x /opt/bin/systemd-mailjet`
