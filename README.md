@@ -4,7 +4,7 @@ Config for my home NAS
 ## Setup
 ### Install CoreOS
 1. Download the latest version of the [config transpiler](https://github.com/coreos/container-linux-config-transpiler/)
-2. Complete config `olaf-clc.yml`
+2. Complete config `olaf-clc.yml`. Use `mkpasswd --method=SHA-512 --rounds=4096` to generate a secure password hash.
 3. Transpile the config using `ct -strict < olaf-clc.yml > olaf-clc.json`
 4. Install CoreOS using `coreos-install -d /dev/sdX -i olaf-clc.json`
 5. Reboot
