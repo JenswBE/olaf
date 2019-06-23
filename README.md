@@ -9,7 +9,7 @@ Config for my home NAS
 4. Install CoreOS using `coreos-install -d /dev/sdX -i olaf-clc.json`
 5. Reboot
 6. Change hostname with `sudo hostnamectl set-hostname olaf`
-7. Create opt folders with `sudo mkdir -p /opt/bin /opt/config`
+7. Create opt folders with `sudo mkdir -p /opt/bin /opt/conf`
 
 ### Docker Compose
 Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at `/opt/bin/docker-compose`
