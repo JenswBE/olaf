@@ -234,7 +234,7 @@ services:
       # Backup locations
       - nc-db-dump:/mnt/source/nextcloud/dbdump:ro
       - nc-calcardbackup:/mnt/source/nextcloud/calcardbackup:ro
-      - /media/data/services/nextcloud:/mnt/source/nextcloud:ro
+      - /media/data/services/nextcloud:/mnt/source/nextcloud/full_install:ro
       # Config and cache
       - ./conf/borgmatic/borgmatic.d:/etc/borgmatic.d
       - ./conf/borgmatic/ssh:/root/.ssh
