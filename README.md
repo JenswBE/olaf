@@ -30,11 +30,6 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
 5. Make file readonly by owner `sudo chmod 400 /opt/conf/systemd-mailjet.conf`
 6. Set correct owner `sudo chown systemd-mailjet:systemd-mailjet /opt/conf/systemd-mailjet.conf`
 
-### Backup Nextcloud
-1. Copy script `bin/backup-nextcloud` to `/opt/bin/backup-nextcloud` and make executable
-2. Edit script and add correct information below heading OPTIONS
-3. Set correct permissions `sudo chmod 500 /opt/bin/backup-nextcloud`
-
 ### BTRFS snapshots
 1. Download the [BTRFS snap script](https://github.com/jf647/btrfs-snap) to `/opt/bin/btrfs-snap` and make executable
 2. Copy script `bin/btrfs-snapshot` to `/opt/bin/btrfs-snapshot` and make executable
