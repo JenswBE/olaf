@@ -15,7 +15,7 @@ storage:
     compression: auto,zstd
     encryption_passphrase: <ENC_PASSPHRASE>
     archive_name_format: '{hostname}-{now}'
-    ssh_command: 'ssh -i /root/.ssh/<SSH_KEY>'
+    ssh_command: 'ssh -i /root/.ssh/<SSH_KEY> -p <SSH_PORT>'
 
 retention:
     keep_daily: 3
