@@ -26,7 +26,7 @@ services:
 #########################
 #      AUTO-UPDATER     #
 #########################
-  auto-updater:
+  watchtower:
     image: containrrr/watchtower:latest
     container_name: watchtower
     restart: always
