@@ -19,8 +19,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./conf/traefik.toml:/traefik.toml
       - traefik-cert:/etc/traefik/acme/ 
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
     environment:
       - CF_API_EMAIL=${PROXY_CF_API_EMAIL}
       - CF_API_KEY=${PROXY_CF_API_KEY}
@@ -29,16 +27,12 @@ services:
 #      AUTO-UPDATER     #
 #########################
   auto-updater:
-    image: v2tec/watchtower:latest
+    image: containrrr/watchtower:latest
     container_name: watchtower
     restart: always
-    labels:
-      - "traefik.enable=false"
-      - "com.centurylinklabs.watchtower.enable=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --schedule "0 0 4 * * *" --label-enable --cleanup
-    network_mode: bridge
+    command: --schedule "0 0 4 * * *" --cleanup
 
 #########################
 #      NEXTCLOUD        #
@@ -70,7 +64,6 @@ services:
       - "traefik.frontend.rule=Host:nextcloud.${DEFAULT_DOMAIN}"
       - "traefik.docker.network=frontend-nextcloud"
       - "traefik.frontend.headers.STSSeconds=15552000"
-      - "com.centurylinklabs.watchtower.enable=true"
 
   nc-db:
     image: mariadb:latest
@@ -87,9 +80,6 @@ services:
       - MYSQL_PASSWORD=${NC_DB_PW_NEXTCLOUD}
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
-    labels:
-      - "traefik.enable=false"
-      - "com.centurylinklabs.watchtower.enable=true"
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin -u $$MYSQL_USER --password=$$MYSQL_PASSWORD ping || exit 1"]
       interval: 30s
@@ -107,7 +97,6 @@ services:
       - "traefik.docker.network=frontend-nextcloud"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.frontend.headers.STSSeconds=15552000"
-      - "com.centurylinklabs.watchtower.enable=true"
     restart: always
     networks:
       - frontend-nextcloud
@@ -160,7 +149,6 @@ services:
       - "traefik.web.frontend.rule=Host:torrent.${DEFAULT_DOMAIN};"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.backend=deluge"
-      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #        SAMBA          #
@@ -180,8 +168,6 @@ services:
       - USERID=233
       - GROUPID=233
     command: samba.sh -S -u "nas;${SAMBA_PW_NAS}" -u "scanner;${SAMBA_PW_SCANNER}" -s "media;/mnt/media;yes;no;no;nas" -s "scans;/mnt/media/Scans;yes;no;no;scanner"
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #         PLEX          #
@@ -202,8 +188,6 @@ services:
       - PLEX_UID=233
       - PLEX_GID=233
       - ADVERTISE_IP=${PLEX_IP}
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #        BACKUP         #
@@ -222,9 +206,6 @@ services:
     environment:
       # Disable cron
       - CRON_TIME="#"
-    labels:
-      - "traefik.enable=false"
-      - "com.centurylinklabs.watchtower.enable=true"
 
   borgmatic:
     image: b3vis/borgmatic
@@ -243,9 +224,6 @@ services:
       - "${PATH_APPDATA}/borgmatic/restore:/mnt/restore"
     environment:
       - TZ=Europe/Brussels
-    labels:
-      - "traefik.enable=false"
-      - "com.centurylinklabs.watchtower.enable=true"
 
 #########################
 #        GENERAL        #
