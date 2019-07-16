@@ -216,6 +216,7 @@ services:
       - nc-db-dump:/mnt/source/nextcloud/dbdump:ro
       - nc-calcardbackup:/mnt/source/nextcloud/calcardbackup:ro
       - /media/data/services/nextcloud:/mnt/source/nextcloud/full_install:ro
+      - "/media/data/media/000. Plex/Photos:/mnt/source/plex/photos:ro"
       # Config and cache
       - ./conf/borgmatic/borgmatic.d:/etc/borgmatic.d
       - ./conf/borgmatic/ssh:/root/.ssh
