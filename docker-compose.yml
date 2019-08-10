@@ -26,7 +26,7 @@ services:
 #    Cloudflare DDNS    #
 #########################
   cloudflare-ddns:
-    image: oznu/cloudflare-ddns:aarch64
+    image: oznu/cloudflare-ddns
     container_name: cloudflare-ddns
     restart: always
     environment:
