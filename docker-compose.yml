@@ -1,5 +1,4 @@
-version: '3.5'
-
+version: '3.7'
 services:
 
 #########################
@@ -13,15 +12,28 @@ services:
       - 80:80
       - 443:443
     networks:
-      - frontend-nextcloud
       - frontend-torrent
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./conf/traefik.toml:/traefik.toml
       - traefik-cert:/etc/traefik/acme/ 
     environment:
-      - CF_API_EMAIL=${PROXY_CF_API_EMAIL}
-      - CF_API_KEY=${PROXY_CF_API_KEY}
+      - "TZ=${DEFAULT_TIMEZONE}"
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_API_KEY=${CF_API_KEY}
+
+#########################
+#    Cloudflare DDNS    #
+#########################
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns:aarch64
+    container_name: cloudflare-ddns
+    restart: always
+    environment:
+      - EMAIL=${CF_API_EMAIL}
+      - API_KEY=${CF_API_KEY}
+      - ZONE=${CF_ZONE}
+      - SUBDOMAIN=${CF_SUBDOMAIN}
 
 #########################
 #      AUTO-UPDATER     #
@@ -33,95 +45,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
-
-#########################
-#      NEXTCLOUD        #
-#########################
-  nextcloud:
-    image: nextcloud:latest
-    container_name: nextcloud
-    hostname: nextcloud
-    restart: always
-    networks:
-      - frontend-nextcloud
-      - backend-nextcloud
-    depends_on:
-      - nc-db
-      - nc-office
-      - nc-elasticsearch
-    volumes:
-      - "${PATH_APPDATA}/nextcloud:/var/www/html"
-      - /media/data/services/nextcloud:/var/www/html/data
     environment:
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=${NC_DB_PW_NEXTCLOUD}
-      - MYSQL_HOST=nc-db
-    labels:
-      - "traefik.enable=true"
-      - "traefik.port=80"
-      - "traefik.backend=nextcloud"
-      - "traefik.frontend.rule=Host:nextcloud.${DEFAULT_DOMAIN}"
-      - "traefik.docker.network=frontend-nextcloud"
-      - "traefik.frontend.headers.STSSeconds=15552000"
-
-  nc-db:
-    image: mariadb:latest
-    container_name: nc-db
-    restart: always
-    networks:
-      - backend-nextcloud
-      - backup-nc-db
-    volumes:
-      - "${PATH_APPDATA}/nc-db:/var/lib/mysql"
-      - nc-db-dump:/backup
-    environment:
-      - MYSQL_ROOT_PASSWORD=${NC_DB_PW_ROOT}
-      - MYSQL_PASSWORD=${NC_DB_PW_NEXTCLOUD}
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin -u $$MYSQL_USER --password=$$MYSQL_PASSWORD ping || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  nc-office:
-    image: onlyoffice/documentserver
-    container_name: nc-office
-    labels:
-      - "traefik.enable=true"
-      - "traefik.web.frontend.rule=Host:office.${DEFAULT_DOMAIN};"
-      - "traefik.port=80"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=frontend-nextcloud"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.frontend.headers.STSSeconds=15552000"
-    restart: always
-    networks:
-      - frontend-nextcloud
-    environment:
-      - JWT_ENABLED=true
-      - JWT_SECRET=${NC_OFFICE_SECRET}
-
-  nc-elasticsearch:
-    build: build/elasticsearchingest
-    container_name: nc-elasticsearch
-    networks:
-      - backend-nextcloud
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - "${PATH_APPDATA}/nc-elasticsearch:/usr/share/elasticsearch/data"
-    expose:
-      - "9200"
-    restart: always
+      - "TZ=${DEFAULT_TIMEZONE}"
 
 #########################
 #       TORRENT         #
@@ -139,9 +64,9 @@ services:
       - "/media/data/media/000. Plex/Nazien:/downloads"
       - "${PATH_APPDATA}/torrent:/config"
     environment:
+      - "TZ=${DEFAULT_TIMEZONE}"
       - PUID=233
       - PGID=233
-      - TZ=Europe/Brussels
     labels:
       - "traefik.enable=true"
       - "traefik.port=8112"
@@ -165,6 +90,7 @@ services:
     volumes:
       - /media/data/media:/mnt/media
     environment:
+      - "TZ=${DEFAULT_TIMEZONE}"
       - USERID=233
       - GROUPID=233
     command: samba.sh -S -u "nas;${SAMBA_PW_NAS}" -u "scanner;${SAMBA_PW_SCANNER}" -s "media;/mnt/media;yes;no;no;nas" -s "scans;/mnt/media/Scans;yes;no;no;scanner"
@@ -183,7 +109,7 @@ services:
       - "${PATH_APPDATA}/plex/config:/config"
       - "${PATH_APPDATA}/plex/transcode:/transcode"
     environment:
-      - TZ=Europe/Brussels
+      - "TZ=${DEFAULT_TIMEZONE}"
       - PLEX_CLAIM=${PLEX_CLAIM}
       - PLEX_UID=233
       - PLEX_GID=233
@@ -192,30 +118,12 @@ services:
 #########################
 #        BACKUP         #
 #########################
-  nc-calcardbackup:
-    image: waja/calcardbackup
-    container_name: nc-calcardbackup
-    restart: always
-    depends_on:
-      - nc-db
-    networks:
-      - backup-nc-db
-    volumes:
-      - "${PATH_APPDATA}/nextcloud/config:/nextcloud/config"
-      - nc-calcardbackup:/backup
-    environment:
-      # Disable cron
-      - CRON_TIME="#"
-
   borgmatic:
     image: b3vis/borgmatic
     container_name: borgmatic
     restart: always
     volumes:
       # Backup locations
-      - nc-db-dump:/mnt/source/nextcloud/dbdump:ro
-      - nc-calcardbackup:/mnt/source/nextcloud/calcardbackup:ro
-      - /media/data/services/nextcloud:/mnt/source/nextcloud/full_install:ro
       - "/media/data/media/000. Plex/Photos:/mnt/source/plex/photos:ro"
       # Config and cache
       - ./conf/borgmatic/borgmatic.d:/etc/borgmatic.d
@@ -224,26 +132,15 @@ services:
       - "${PATH_APPDATA}/borgmatic/cache:/root/.cache/borg"
       - "${PATH_APPDATA}/borgmatic/restore:/mnt/restore"
     environment:
-      - TZ=Europe/Brussels
+      - "TZ=${DEFAULT_TIMEZONE}"
 
 #########################
 #        GENERAL        #
 #########################
 volumes:
   traefik-cert:
-  nc-db-dump:
-  nc-calcardbackup:
 
 networks:
-  frontend-nextcloud:
-    name: frontend-nextcloud
-
-  backend-nextcloud:
-    name: backend-nextcloud
-
-  backup-nc-db:
-    name: backup-nc-db
-
   frontend-torrent:
     name: frontend-torrent
 

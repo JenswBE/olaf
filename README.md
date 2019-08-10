@@ -9,7 +9,8 @@ Config for my home NAS
 4. Install CoreOS using `coreos-install -d /dev/sdX -i olaf-clc.json`
 5. Reboot
 6. Change hostname with `sudo hostnamectl set-hostname olaf`
-7. Create opt folders with `sudo mkdir -p /opt/bin /opt/conf`
+7. Set correct timezone with `sudo timedatectl set-timezone Europe/Brussels`
+8. Create opt folders with `sudo mkdir -p /opt/bin /opt/conf`
 
 ### Docker Compose
 Use [following instructions](https://docs.docker.com/compose/install/#install-compose) and install Docker compose at `/opt/bin/docker-compose`
@@ -41,9 +42,6 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
 ##### Traefik
 Edit file `conf/traefik.toml` and change parameters `domain` and `email`
 
-##### NC-Elasticsearch
-Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-count.conf`
-
 #### After up
 ##### Borgmatic
 1. Execute `docker exec -it borgmatic sh -c "ssh <REMOTE_USER>@<REMOTE_URL>"`, check and accept the host key
@@ -54,25 +52,6 @@ Copy config `conf/sysctl.d/50-max-map-count.conf` to `/etc/sysctl.d/50-max-map-c
 6. Init repo if required with `docker exec borgmatic sh -c "borgmatic --init --encryption repokey-blake2"`
 7. Perform a backup to test the setup with `docker exec borgmatic sh -c "borgmatic --verbosity 1"`
 8. Optional: Backup your repo key file with `docker exec borgmatic sh -c "BORG_RSH=\"ssh -i /root/.ssh/<NAME_OF_SSH_KEY>\" borg key export --qr-html <FULL_REPO_NAME> /root/.ssh/repokey.html"`. Your file is available at `conf/borgmatic/ssh/repokey.html`.
-
-##### Nextcloud
-Disable following apps:
-- First run wizard 
-
-Install and configure following apps:
-- OnlyOffice
-- Calendar
-- Deck
-- Group folders
-- Notes
-- Polls
-- Quota warning
-- Tasks
-- Full text search 
-- Full text search - Elasticsearch Platform
-- Full text search - Files
-- Preview generator
-- Unsplash
 
 ##### Deluge
 1. Go through online settings
@@ -110,11 +89,9 @@ Go to https://app.plex.tv to setup following libraries:
 
 ## Scheduled jobs
 ### One shot
-- 5 min after boot: Nextcloud FullTextSearch index job (olaf-clc.yml => nextcloud-fulltextsearch-index.timer)
+- None
 
 ### Continuous
-- Every 5 mins: Nextcloud cron.php (olaf-clc.yml => nextcloud-cron.timer)
-- Every 10 mins: Nextcloud generate previews (olaf-clc.yml => nextcloud-preview-generator.timer)
 - Every 15 mins: Update IP in DNS (olaf-clc.yml => cloudflare-dyndns.timer)
 - Every hour: Take BTRFS snapshot (olaf-clc.yml => btrfs-snapshot.timer)
 
@@ -122,8 +99,7 @@ Go to https://app.plex.tv to setup following libraries:
 - None
 
 ### 02:00 Prepare backup
-- Dump Nextcloud DB (olaf-clc.yml => dump-nc-db.timer)
-- Dump Nextcloud calendars and contacts (olaf-clc.yml => backup-nc-calcardbackup.timer)
+- None
 
 ### 03:00 Perform backup
 - Run Borgmatic (conf/borgmatic/borgmatic.d/crontab.txt)
