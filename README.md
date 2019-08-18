@@ -31,11 +31,6 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
 5. Make file readonly by owner `sudo chmod 400 /opt/conf/systemd-mailjet.conf`
 6. Set correct owner `sudo chown systemd-mailjet:systemd-mailjet /opt/conf/systemd-mailjet.conf`
 
-### BTRFS snapshots
-1. Download the [BTRFS snap script](https://github.com/jf647/btrfs-snap) to `/opt/bin/btrfs-snap` and make executable
-2. Copy script `bin/btrfs-snapshot` to `/opt/bin/btrfs-snapshot` and make executable
-3. Set correct permissions `sudo chmod 544 /opt/bin/btrfs-snap /opt/bin/btrfs-snapshot`
-
 ### Containers
 #### Before up
 
