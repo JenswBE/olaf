@@ -20,7 +20,7 @@ defaultEntryPoints = ["https","http"]
 
 [docker]
 endpoint = "unix:///var/run/docker.sock"
-domain = "jensw.eu"
+domain = "jensw.be"
 watch = true
 exposedbydefault = false
 
@@ -33,5 +33,5 @@ entryPoint = "https"
     delayBeforeCheck = 0
 
 [[acme.domains]]
-  main = "*.jensw.eu"
-  sans = ["jensw.eu"]
+  main = "*.jensw.be"
+  sans = ["jensw.be"]
