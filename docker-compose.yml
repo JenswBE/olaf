@@ -1,6 +1,12 @@
 version: '3.7'
-services:
 
+x-labels:
+  &traefik-tls
+  - "traefik.enable=true"
+  - "traefik.http.routers.torrent.entrypoints=websecure"
+  - "traefik.http.routers.torrent.tls.certresolver=le-on-cf"
+
+services:
 #########################
 #         PROXY         #
 #########################
@@ -77,7 +83,7 @@ services:
       - PUID=233
       - PGID=233
     labels:
-      - "traefik.enable=true"
+      << : *traefik-tls
       - "traefik.docker.network=frontend-torrent"
       - "traefik.http.routers.torrent.rule=Host(`torrent.${DEFAULT_DOMAIN}`)"
       - "traefik.http.services.torrent.loadbalancer.server.port=8112"
