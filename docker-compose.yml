@@ -24,6 +24,13 @@ services:
       - "--certificatesresolvers.le-on-cf.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.le-on-cf.acme.email=${ADMIN_MAIL}"
       - "--certificatesresolvers.le-on-cf.acme.storage=/letsencrypt/acme.json"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+      - "traefik.http.routers.https-redirect.entrypoints=web"
+      - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
+      - "traefik.http.routers.https-redirect.middlewares=https-redirect"
     ports:
       - 80:80
       - 443:443
