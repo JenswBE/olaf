@@ -2,9 +2,9 @@ version: '3.7'
 
 x-labels:
   &traefik-tls
-  - "traefik.enable=true"
-  - "traefik.http.routers.torrent.entrypoints=websecure"
-  - "traefik.http.routers.torrent.tls.certresolver=le-on-cf"
+  traefik.enable: true
+  traefik.http.routers.torrent.entrypoints: websecure
+  traefik.http.routers.torrent.tls.certresolver: le-on-cf
 
 services:
 #########################
@@ -84,9 +84,9 @@ services:
       - PGID=233
     labels:
       << : *traefik-tls
-      - "traefik.docker.network=frontend-torrent"
-      - "traefik.http.routers.torrent.rule=Host(`torrent.${DEFAULT_DOMAIN}`)"
-      - "traefik.http.services.torrent.loadbalancer.server.port=8112"
+      traefik.docker.network: frontend-torrent
+      traefik.http.routers.torrent.rule: Host(`torrent.${DEFAULT_DOMAIN}`)
+      traefik.http.services.torrent.loadbalancer.server.port: 8112
 
 #########################
 #        SAMBA          #
