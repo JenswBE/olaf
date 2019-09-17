@@ -5,18 +5,27 @@ services:
 #         PROXY         #
 #########################
   traefik:
-    image: traefik:v1.7
+    image: traefik:latest
     container_name: traefik    
-    restart: always 
+    restart: always
+    command:
+      - "--log.level=DEBUG"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le-on-cf.acme.dnschallenge=true"
+      - "--certificatesresolvers.le-on-cf.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.le-on-cf.acme.email=${ADMIN_MAIL}"
+      - "--certificatesresolvers.le-on-cf.acme.storage=/letsencrypt/acme.json"
     ports:
       - 80:80
       - 443:443
     networks:
       - frontend-torrent
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./conf/traefik.toml:/traefik.toml
-      - traefik-cert:/etc/traefik/acme/ 
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-cert:/letsencrypt/ 
     environment:
       - "TZ=${DEFAULT_TIMEZONE}"
       - CF_API_EMAIL=${CF_API_EMAIL}
@@ -69,11 +78,9 @@ services:
       - PGID=233
     labels:
       - "traefik.enable=true"
-      - "traefik.port=8112"
       - "traefik.docker.network=frontend-torrent"
-      - "traefik.web.frontend.rule=Host:torrent.${DEFAULT_DOMAIN};"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.backend=deluge"
+      - "traefik.http.routers.torrent.rule=Host(`torrent.${DEFAULT_DOMAIN}`)"
+      - "traefik.http.services.torrent.loadbalancer.server.port=8112"
 
 #########################
 #        SAMBA          #
