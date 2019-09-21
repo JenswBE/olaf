@@ -32,11 +32,6 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
 6. Set correct owner `sudo chown systemd-mailjet:systemd-mailjet /opt/conf/systemd-mailjet.conf`
 
 ### Containers
-#### Before up
-
-##### Traefik
-Edit file `conf/traefik.toml` and change parameters `domain` and `email`
-
 #### After up
 ##### Borgmatic
 1. Execute `docker exec -it borgmatic sh -c "ssh <REMOTE_USER>@<REMOTE_URL>"`, check and accept the host key
