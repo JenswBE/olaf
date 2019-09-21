@@ -49,6 +49,7 @@ services:
     container_name: cloudflare-ddns
     restart: always
     environment:
+      - "TZ=${DEFAULT_TIMEZONE}"
       - EMAIL=${CF_API_EMAIL}
       - API_KEY=${CF_API_KEY}
       - ZONE=${CF_ZONE}
