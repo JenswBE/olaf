@@ -20,8 +20,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.le-on-cf.acme.dnschallenge=true"
-      - "--certificatesresolvers.le-on-cf.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.le-on-cf.acme.tlsChallenge=true"
       - "--certificatesresolvers.le-on-cf.acme.email=${ADMIN_MAIL}"
       - "--certificatesresolvers.le-on-cf.acme.storage=/letsencrypt/acme.json"
     labels:
@@ -41,8 +40,6 @@ services:
       - traefik-cert:/letsencrypt/ 
     environment:
       - "TZ=${DEFAULT_TIMEZONE}"
-      - CF_API_EMAIL=${CF_API_EMAIL}
-      - CF_API_KEY=${CF_API_KEY}
 
 #########################
 #    Cloudflare DDNS    #
