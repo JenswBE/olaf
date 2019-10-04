@@ -41,6 +41,8 @@ networkd:
         [Network]
         DNS=84.200.69.80
         DNS=84.200.70.40
+        DNS=1.1.1.1
+        DNS=1.0.0.1
 
         [Address]
         Address=192.168.1.250

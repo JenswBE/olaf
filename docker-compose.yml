@@ -1,15 +1,42 @@
 version: '3.7'
 
-x-labels:
-  &traefik-tls
-  traefik.enable: true
-  traefik.http.routers.torrent.entrypoints: websecure
-  traefik.http.routers.torrent.tls.certresolver: le-on-cf
+# #################################################################
+# #                            GENERAL                            #
+# #################################################################
 
+# Service template
+x-service:
+    image: example:latest
+    container_name: example
+    hostname: example
+    restart: always
+    command:
+      - "--example"
+    ports:
+      - 9999:9999
+    networks:
+      - example-network
+    depends-on:
+      - example-db
+    volumes:
+      - ./example-source:/example-source
+    environment:
+      - "TZ=${DEFAULT_TIMEZONE}"
+    labels:
+      example-label: example
+    healthcheck:
+      test: ["CMD-SHELL", "example || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+# #################################################################
+# #                            SERVICES                           #
+# #################################################################
 services:
-#########################
-#         PROXY         #
-#########################
+# =========================
+# =         PROXY         =
+# =========================
   traefik:
     image: traefik:latest
     container_name: traefik    
@@ -23,13 +50,6 @@ services:
       - "--certificatesresolvers.le-on-cf.acme.tlsChallenge=true"
       - "--certificatesresolvers.le-on-cf.acme.email=${ADMIN_MAIL}"
       - "--certificatesresolvers.le-on-cf.acme.storage=/letsencrypt/acme.json"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
-      - "traefik.http.routers.https-redirect.entrypoints=web"
-      - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
-      - "traefik.http.routers.https-redirect.middlewares=https-redirect"
     ports:
       - 80:80
       - 443:443
@@ -40,10 +60,17 @@ services:
       - traefik-cert:/letsencrypt/ 
     environment:
       - "TZ=${DEFAULT_TIMEZONE}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+      - "traefik.http.routers.https-redirect.entrypoints=web"
+      - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
+      - "traefik.http.routers.https-redirect.middlewares=https-redirect"
 
-#########################
-#    Cloudflare DDNS    #
-#########################
+# =========================
+# =    Cloudflare DDNS    =
+# =========================
   cloudflare-ddns:
     image: oznu/cloudflare-ddns
     container_name: cloudflare-ddns
@@ -55,9 +82,9 @@ services:
       - ZONE=${CF_ZONE}
       - SUBDOMAIN=${CF_SUBDOMAIN}
 
-#########################
-#      AUTO-UPDATER     #
-#########################
+# =========================
+# =     AUTO-UPDATER      =
+# =========================
   watchtower:
     image: containrrr/watchtower:latest
     container_name: watchtower
@@ -76,9 +103,9 @@ services:
       - "WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${MS_PW}"
       - "WATCHTOWER_NOTIFICATION_EMAIL_DELAY=60"
 
-#########################
-#       TORRENT         #
-#########################
+# =========================
+# =        TORRENT        =
+# =========================
   torrent:
     image: linuxserver/deluge
     container_name: torrent
@@ -96,14 +123,16 @@ services:
       - PUID=233
       - PGID=233
     labels:
-      << : *traefik-tls
-      traefik.docker.network: frontend-torrent
-      traefik.http.routers.torrent.rule: Host(`torrent.${DEFAULT_DOMAIN}`)
-      traefik.http.services.torrent.loadbalancer.server.port: 8112
+      - "traefik.enable=true"
+      - "traefik.docker.network=frontend-torrent"
+      - "traefik.http.routers.torrent.entrypoints=websecure"
+      - "traefik.http.routers.torrent.rule=Host(`torrent.${DEFAULT_DOMAIN}`)"
+      - "traefik.http.routers.torrent.tls.certresolver=le-on-cf"
+      - "traefik.http.services.torrent.loadbalancer.server.port=8112"
 
-#########################
-#        SAMBA          #
-#########################
+# =========================
+# =         SAMBA         =
+# =========================
   samba:
     image: dperson/samba
     container_name: samba
@@ -121,9 +150,9 @@ services:
       - GROUPID=233
     command: samba.sh -S -u "nas;${SAMBA_PW_NAS}" -u "scanner;${SAMBA_PW_SCANNER}" -s "media;/mnt/media;yes;no;no;nas" -s "scans;/mnt/media/Scans;yes;no;no;scanner"
 
-#########################
-#         PLEX          #
-#########################
+# =========================
+# =          PLEX         =
+# =========================
   plex:
     image: plexinc/pms-docker
     container_name: plex
@@ -141,9 +170,9 @@ services:
       - PLEX_GID=233
       - ADVERTISE_IP=${PLEX_IP}
 
-#########################
-#        BACKUP         #
-#########################
+# =========================
+# =         BACKUP        =
+# =========================
   borgmatic:
     image: b3vis/borgmatic
     container_name: borgmatic
@@ -160,12 +189,15 @@ services:
     environment:
       - "TZ=${DEFAULT_TIMEZONE}"
 
-#########################
-#        GENERAL        #
-#########################
+# #################################################################
+# #                            VOLUMES                            #
+# #################################################################
 volumes:
   traefik-cert:
 
+# #################################################################
+# #                            NETWORKS                           #
+# #################################################################
 networks:
   frontend-torrent:
     name: frontend-torrent
