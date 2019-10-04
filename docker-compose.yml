@@ -81,6 +81,9 @@ services:
       - API_KEY=${CF_API_KEY}
       - ZONE=${CF_ZONE}
       - SUBDOMAIN=${CF_SUBDOMAIN}
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
 
 # =========================
 # =     AUTO-UPDATER      =
