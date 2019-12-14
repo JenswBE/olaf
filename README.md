@@ -43,8 +43,19 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
 7. Perform a backup to test the setup with `docker exec borgmatic sh -c "borgmatic --verbosity 1"`
 8. Optional: Backup your repo key file with `docker exec borgmatic sh -c "BORG_RSH=\"ssh -i /root/.ssh/<NAME_OF_SSH_KEY>\" borg key export --qr-html <FULL_REPO_NAME> /root/.ssh/repokey.html"`. Your file is available at `conf/borgmatic/ssh/repokey.html`.
 
+##### Transmission
+1. Set correct permission with `sudo chown 233:233 /media/data/services/transmission/`
+2. Go through online settings
+  - Category Torrents
+    - Set "Download to" to `/downloads`
+    - Set "Directory for incomplete files" to `/running`
+    - Set "Stop seeding at ratio" to 3
+  - Category Queue
+    - Set "Download Queue Size" to 10
+
 ##### Deluge
-1. Go through online settings
+1. Set correct permission with `sudo chown 233:233 /media/data/services/torrent/`
+2. Go through online settings
   - Category Downloads
     - Set "Download to" to `/running`
     - Set "Move completed to" to `/downloads`
@@ -57,10 +68,10 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
     - Set "Share ratio limit" to 2
     - Enable "Stop seeding when share ratio reaches", set to 2
     - Enable "Remove torrent when share ratio is reached"
-2. Stop container
-3. Edit web.conf
+3. Stop container
+4. Edit web.conf
   - Set "default_daemon" to `127.0.0.1:58846`
-4. Start container
+5. Start container
 
 #### Plex
 Go to https://app.plex.tv to setup following libraries:
