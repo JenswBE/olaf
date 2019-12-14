@@ -121,7 +121,7 @@ services:
     volumes:
       - "/media/data/services/transmission/:/running"
       - "/media/data/media/000. Plex/Nazien:/downloads"
-      - "${PATH_APPDATA}/transmission:/config
+      - "${PATH_APPDATA}/transmission:/config"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend-torrent"
