@@ -34,7 +34,7 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
 ### Containers
 #### After up
 ##### Borgmatic
-1. Execute `docker exec -it borgmatic sh -c "ssh <REMOTE_USER>@<REMOTE_URL>"`, check and accept the host key
+1. Execute `docker exec -it borgmatic sh -c "ssh -p <PORT> <BORG_USER>@<BORG_HOST>"`, check and accept the host key
 2. Execute `ssh-keygen` and create a new ssh key with blank passphrase in `conf/borgmatic/ssh`
 3. Add public key to allowed ssh keys at remote host (depending on service)
 4. Copy from template and edit `conf/borgmatic/borgmatic.d/config.yaml`

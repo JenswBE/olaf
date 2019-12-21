@@ -1,6 +1,7 @@
 # Update following placeholders:
-# - REPO_USER
-# - REPO_URL
+# - SSH_USER
+# - SSH_HOST
+# - FOLDER
 # - SSH_KEY
 # - SSH_PORT
 
@@ -9,11 +10,11 @@ location:
         - /mnt/source
 
     repositories:
-        - <REPO_USER>@<REPO_URL>:repo
+        - <SSH_USER>@<SSH_HOST>:<FOLDER>
 
 storage:
-    compression: auto,zstd
-    archive_name_format: '{hostname}-{now}'
+    compression: lz4
+    archive_name_format: 'backup-{now}'
     ssh_command: 'ssh -i /root/.ssh/<SSH_KEY> -p <SSH_PORT>'
 
 retention:
@@ -21,17 +22,19 @@ retention:
     keep_weekly: 4
     keep_monthly: 12
     keep_yearly: 2
-    prefix: '{hostname}-'
+    prefix: 'backup-'
 
 consistency:
     checks:
         - repository
         - archives
     check_last: 3
-    prefix: '{hostname}-'
+    prefix: 'backup-'
 
 hooks:
     before_backup:
         - echo "`date` - Starting backup"
     after_backup:
         - echo "`date` - Finished backup"
+    on_error:
+        - echo "Error while creating a backup."
