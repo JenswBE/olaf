@@ -242,6 +242,7 @@ services:
       - "${PATH_APPDATA}/borgmatic/restore:/mnt/restore"
     environment:
       - "TZ=${DEFAULT_TIMEZONE}"
+      - "BORG_PASSPHRASE=${BORG_PASSPHRASE}"
       - "MAIL_RELAY_HOST=${MAIL_HOSTNAME}"
       - "MAIL_PORT=${MAIL_PORT}"
       - "MAIL_USER=${MAIL_USER}"
