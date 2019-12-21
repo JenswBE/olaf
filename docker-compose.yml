@@ -39,7 +39,7 @@ services:
 # =========================
   traefik:
     image: traefik:latest
-    container_name: traefik    
+    container_name: traefik
     restart: always
     command:
       - "--log.level=DEBUG"
@@ -50,6 +50,10 @@ services:
       - "--certificatesresolvers.le-on-cf.acme.tlsChallenge=true"
       - "--certificatesresolvers.le-on-cf.acme.email=${ADMIN_MAIL}"
       - "--certificatesresolvers.le-on-cf.acme.storage=/letsencrypt/acme.json"
+      - "--api.dashboard=true"
+      - "--ping=true"
+      - "--ping.entrypoint=websecure"
+      - "--ping.manualrouting=true"
     ports:
       - 80:80
       - 443:443
@@ -58,7 +62,7 @@ services:
       - frontend-torrent-old
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik-cert:/letsencrypt/ 
+      - traefik-cert:/letsencrypt/
     environment:
       - "TZ=${DEFAULT_TIMEZONE}"
     labels:
@@ -68,6 +72,16 @@ services:
       - "traefik.http.routers.https-redirect.entrypoints=web"
       - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
       - "traefik.http.routers.https-redirect.middlewares=https-redirect"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.rule=Host(`traefik-${HOSTNAME}.${DEFAULT_DOMAIN}`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.middlewares.api-auth.basicauth.users=${TRAEFIK_API_USER}"
+      - "traefik.http.routers.api.middlewares=api-auth"
+      - "traefik.http.routers.api.tls.certresolver=le-on-cf"
+      - "traefik.http.routers.ping.entrypoints=websecure"
+      - "traefik.http.routers.ping.rule=Host(`ping-${HOSTNAME}.${DEFAULT_DOMAIN}`)"
+      - "traefik.http.routers.ping.service=ping@internal"
+      - "traefik.http.routers.ping.tls.certresolver=le-on-cf"
 
 # =========================
 # =    Cloudflare DDNS    =
@@ -252,4 +266,3 @@ networks:
 
   samba:
     name: samba
-
