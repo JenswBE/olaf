@@ -24,8 +24,9 @@
 
 !/conf/borgmatic/
 !/conf/borgmatic/borgmatic.d/
-!/conf/borgmatic/borgmatic.d/config.yaml.template
+!/conf/borgmatic/borgmatic.d/config.template.yaml
 !/conf/borgmatic/borgmatic.d/crontab.txt
+!/conf/borgmatic/borgmatic.d/msmtprc.sh
 
 !/conf/borgmatic/ssh/
 !/conf/borgmatic/ssh/.gitkeep

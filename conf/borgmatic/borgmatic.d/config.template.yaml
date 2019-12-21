@@ -1,8 +1,8 @@
 # Update following placeholders:
 # - REPO_USER
 # - REPO_URL
-# - ENC_PASSPHRASE
 # - SSH_KEY
+# - SSH_PORT
 
 location:
     source_directories:
@@ -13,12 +13,11 @@ location:
 
 storage:
     compression: auto,zstd
-    encryption_passphrase: <ENC_PASSPHRASE>
     archive_name_format: '{hostname}-{now}'
     ssh_command: 'ssh -i /root/.ssh/<SSH_KEY> -p <SSH_PORT>'
 
 retention:
-    keep_daily: 3
+    keep_daily: 7
     keep_weekly: 4
     keep_monthly: 12
     keep_yearly: 2
@@ -26,17 +25,13 @@ retention:
 
 consistency:
     checks:
-        # uncomment to always do integrity checks. (takes long time for large repos)
-        #- repository
-        - disabled
-
+        - repository
+        - archives
     check_last: 3
     prefix: '{hostname}-'
 
 hooks:
-    # List of one or more shell commands or scripts to execute before creating a backup.
     before_backup:
         - echo "`date` - Starting backup"
-
     after_backup:
         - echo "`date` - Finished backup"
