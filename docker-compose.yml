@@ -58,8 +58,7 @@ services:
       - 80:80
       - 443:443
     networks:
-      - frontend-torrent
-      - frontend-torrent-old
+      - frontend-transmission
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-cert:/letsencrypt/
@@ -121,7 +120,7 @@ services:
     container_name: transmission
     restart: always
     networks:
-      - frontend-torrent
+      - frontend-transmission
     ports:
       - "51413:51413"
       - "51413:51413/udp"
@@ -138,35 +137,11 @@ services:
       - "${PATH_APPDATA}/transmission:/config"
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=frontend-torrent"
+      - "traefik.docker.network=frontend-transmission"
       - "traefik.http.routers.torrent.entrypoints=websecure"
       - "traefik.http.routers.torrent.rule=Host(`torrent.${DEFAULT_DOMAIN}`)"
       - "traefik.http.routers.torrent.tls.certresolver=le-on-cf"
       - "traefik.http.services.torrent.loadbalancer.server.port=9091"
-
-  torrent:
-    image: linuxserver/deluge
-    container_name: torrent-old
-    restart: always
-    networks:
-      - frontend-torrent-old
-    ports:
-      - "58946:58946"
-    volumes:
-      - "/media/data/services/torrent/:/running"
-      - "/media/data/media/000. Plex/Nazien:/downloads"
-      - "${PATH_APPDATA}/torrent:/config"
-    environment:
-      - "TZ=${DEFAULT_TIMEZONE}"
-      - PUID=233
-      - PGID=233
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=frontend-torrent-old"
-      - "traefik.http.routers.torrent-old.entrypoints=websecure"
-      - "traefik.http.routers.torrent-old.rule=Host(`torrent-old.${DEFAULT_DOMAIN}`)"
-      - "traefik.http.routers.torrent-old.tls.certresolver=le-on-cf"
-      - "traefik.http.services.torrent-old.loadbalancer.server.port=8112"
 
 # =========================
 # =         SAMBA         =
@@ -259,11 +234,8 @@ volumes:
 # #                            NETWORKS                           #
 # #################################################################
 networks:
-  frontend-torrent:
-    name: frontend-torrent
-
-  frontend-torrent-old:
-    name: frontend-torrent-old
+  frontend-transmission:
+    name: frontend-transmission
 
   samba:
     name: samba

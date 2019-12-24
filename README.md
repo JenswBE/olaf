@@ -53,26 +53,6 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
   - Category Queue
     - Set "Download Queue Size" to 10
 
-##### Deluge
-1. Set correct permission with `sudo chown 233:233 /media/data/services/torrent/`
-2. Go through online settings
-  - Category Downloads
-    - Set "Download to" to `/running`
-    - Set "Move completed to" to `/downloads`
-    - Set "Allocation" to "Use Full"
-  - Category Network
-    - Change incoming port to fixed port `58946`
-  - Category Interface
-    - Change password
-  - Category Queue
-    - Set "Share ratio limit" to 2
-    - Enable "Stop seeding when share ratio reaches", set to 2
-    - Enable "Remove torrent when share ratio is reached"
-3. Stop container
-4. Edit web.conf
-  - Set "default_daemon" to `127.0.0.1:58846`
-5. Start container
-
 #### Plex
 Go to https://app.plex.tv to setup following libraries:
 - Films
