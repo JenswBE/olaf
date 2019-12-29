@@ -203,10 +203,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=frontend-minio"
-      - "traefik.http.routers.torrent.entrypoints=websecure"
-      - "traefik.http.routers.torrent.rule=Host(`minio-${HOSTNAME}.${DEFAULT_DOMAIN}`)"
-      - "traefik.http.routers.torrent.tls.certresolver=le-on-cf"
-      - "traefik.http.services.torrent.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio.entrypoints=websecure"
+      - "traefik.http.routers.minio.rule=Host(`minio-${HOSTNAME}.${DEFAULT_DOMAIN}`)"
+      - "traefik.http.routers.minio.tls.certresolver=le-on-cf"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
