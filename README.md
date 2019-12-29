@@ -68,6 +68,31 @@ Go to https://app.plex.tv to setup following libraries:
 - Muziek
   - /data/media/Music
 
+#### MinIO
+You can create a new bucket and assign read/write right to a user with following commands:
+1. Start the MinIO client: `docker run -it --entrypoint=/bin/sh minio/mc`
+2. Add a new server: `mc config host add remote <URL> <ACCESS_KEY> <SECRET_KEY>`
+3. Set bucket name for easy reference: `BUCKET=<REPLACE_ME>`
+4. Create bucket: `mc mb remote/${BUCKET:?}`
+5. Create readwrite policy:
+```bash
+cat > ${BUCKET:?}-rw.json << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["s3:*"],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:s3:::${BUCKET:?}/*"]
+    }
+  ]
+}
+EOF
+```
+6. Add policy to MinIO server: `mc admin policy add remote ${BUCKET:?}-rw ${BUCKET:?}-rw.json`
+7. Create new user: `mc admin user add remote <USERNAME> <PASSWORD>`
+8. Assign policy to user: `mc admin policy set remote ${BUCKET:?}-rw <USERNAME>`
+
 ## Scheduled jobs
 ### One shot
 - None
