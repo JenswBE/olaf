@@ -103,7 +103,6 @@ EOF
 
 ### Continuous
 - Every 15 mins: Update IP in DNS (olaf-clc.yml => cloudflare-dyndns.timer)
-- Every hour: Take BTRFS snapshot (olaf-clc.yml => btrfs-snapshot.timer)
 
 ### 01:00 Daily application jobs
 - None
