@@ -173,7 +173,7 @@ services:
     network_mode: "host"
     volumes:
       - "/media/data/media/000. Plex:/data/media"
-      - /media/data/media-plex-optimized/:/data/optimized
+      - "/media/data/services/plex/optimized:/data/optimized"
       - "${PATH_APPDATA}/plex/config:/config"
       - "${PATH_APPDATA}/plex/transcode:/transcode"
     environment:
