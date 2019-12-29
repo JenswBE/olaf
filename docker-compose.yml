@@ -214,6 +214,21 @@ services:
       retries: 3
 
 # =========================
+# =      BORG SERVER      =
+# =========================
+  borgserver:
+    image: nold360/borgserver
+    container_name: borgserver
+    restart: always
+    ports:
+      - "2222:22"
+    volumes:
+      - "/media/data/services/borgserver:/backup"
+      - ./conf/borgserver:/sshkeys
+    environment:
+      - "TZ=${DEFAULT_TIMEZONE}"
+
+# =========================
 # =       MONITORING      =
 # =========================
   logzio-logs:

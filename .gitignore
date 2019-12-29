@@ -11,16 +11,10 @@
 !/.env.template
 
 !/bin/
-!/bin/btrfs-snapshot
 !/bin/systemd-mailjet
-
-!/build/
-!/build/elasticsearchingest/
-!/build/elasticsearchingest/Dockerfile
 
 !/conf/
 !/conf/systemd-mailjet.conf
-!/conf/traefik.toml
 
 !/conf/borgmatic/
 !/conf/borgmatic/borgmatic.d/
@@ -31,5 +25,7 @@
 !/conf/borgmatic/ssh/
 !/conf/borgmatic/ssh/.gitkeep
 
-!/conf/sysctl.d/
-!/conf/sysctl.d/50-max-map-count.conf.conf
+!/conf/
+!/conf/borgserver/
+!/conf/borgserver/clients/
+!/conf/borgserver/clients/.gitkeep

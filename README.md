@@ -32,6 +32,10 @@ Send mail on failed unit. See [JenswBE/systemd-mailjet](https://github.com/Jensw
 6. Set correct owner `sudo chown systemd-mailjet:systemd-mailjet /opt/conf/systemd-mailjet.conf`
 
 ### Containers
+#### Before up
+##### Borg Server
+Add for each host a file which contains a single line with the hosts public SSH key. The filename will become the name of the borg repo. E.g. `conf/borgserver/clients/test123` becomes `ssh://borg@<SERVER_NAME>/backup/test123/<REPO_NAME>`. See [docker-borgserver](https://github.com/Nold360/docker-borgserver#sshkeysclients) for more info.
+
 #### After up
 ##### Borgmatic
 1. Execute `docker exec -it borgmatic sh -c "ssh -p <PORT> <BORG_USER>@<BORG_HOST>"`, check and accept the host key
