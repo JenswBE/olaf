@@ -91,7 +91,7 @@ EOF
 ```
 6. Add policy to MinIO server: `mc admin policy add remote ${BUCKET:?}-rw ${BUCKET:?}-rw.json`
 7. Create new user: `mc admin user add remote <USERNAME> <PASSWORD>`
-8. Assign policy to user: `mc admin policy set remote ${BUCKET:?}-rw <USERNAME>`
+8. Assign policy to user: `mc admin policy set remote ${BUCKET:?}-rw user=<USERNAME>`
 
 ## Scheduled jobs
 ### One shot
