@@ -134,7 +134,7 @@ services:
       - PASS=${TRANSMISSION_PASSWORD}
     volumes:
       - "/media/data/services/transmission/:/running"
-      - "/media/data/media/000. Plex/Nazien:/downloads"
+      - "/media/data/media/000. Plex/Nazien:/complete"
       - "${PATH_APPDATA}/transmission:/config"
     labels:
       - "traefik.enable=true"
