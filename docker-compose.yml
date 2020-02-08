@@ -58,6 +58,7 @@ services:
       - 80:80
       - 443:443
     networks:
+      - traefik
       - frontend-transmission
       - frontend-minio
     volumes:
@@ -185,6 +186,30 @@ services:
       - ADVERTISE_IP=${PLEX_IP}
 
 # =========================
+# =   TINY MEDIA MANAGER  =
+# =========================
+  tmm:
+    image: romancin/tinymediamanager
+    container_name: tmm
+    restart: always
+    networks:
+      - traefik
+    volumes:
+      - "/media/data/media/000. Plex:/media"
+      - "${PATH_APPDATA}/tmm/config:/config"
+    environment:
+      - "TZ=${DEFAULT_TIMEZONE}"
+      - "GROUP_ID=0"
+      - "USER_ID=0"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.tmm.entrypoints=websecure"
+      - "traefik.http.routers.tmm.rule=Host(`tmm.${DEFAULT_DOMAIN}`)"
+      - "traefik.http.routers.tmm.tls.certresolver=le-on-cf"
+      - "traefik.http.services.tmm.loadbalancer.server.port=5800"
+
+# =========================
 # =         MINIO         =
 # =========================
   minio:
@@ -279,6 +304,9 @@ volumes:
 # #                            NETWORKS                           #
 # #################################################################
 networks:
+  traefik:
+    name: traefik
+
   frontend-transmission:
     name: frontend-transmission
 
