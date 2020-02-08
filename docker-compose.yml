@@ -204,8 +204,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
+      - "traefik.http.middlewares.tmm-auth.basicauth.users=${TMM_USER}"
       - "traefik.http.routers.tmm.entrypoints=websecure"
       - "traefik.http.routers.tmm.rule=Host(`tmm.${DEFAULT_DOMAIN}`)"
+      - "traefik.http.routers.tmm.middlewares=tmm-auth"
       - "traefik.http.routers.tmm.tls.certresolver=le-on-cf"
       - "traefik.http.services.tmm.loadbalancer.server.port=5800"
 
