@@ -1,6 +1,5 @@
 # Values to change
 # <PASSWORD_HASH>
-# <CLOUDFLARE_TOKEN>
 
 passwd:
   users:
@@ -57,7 +56,6 @@ networkd:
         Name=wan0
 
         [Network]
-        # DHCP=yes
         DHCP = no
 
 update:
@@ -96,28 +94,6 @@ systemd:
         [Install]
         WantedBy=default.target
 
-    - name: btrfs-snapshot.service
-      contents: |
-        [Unit]
-        Description=Check for BTRFS snapshot every hour
-        OnFailure=unit-fail-mail@%n.service
-
-        [Service]
-        Type=oneshot
-        ExecStart=/opt/bin/btrfs-snapshot
-
-    - name: btrfs-snapshot.timer
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Check for BTRFS snapshot every hour
-
-        [Timer]
-        OnCalendar=hourly
-
-        [Install]
-        WantedBy=timers.target
-
     - name: btrfs-scrub.service
       contents: |
         [Unit]
@@ -154,7 +130,7 @@ systemd:
         WantedBy=multi-user.target
 
     - name: media-backup.mount
-      enabled: true
+      enabled: false
       contents: |
         [Mount]
         What=/dev/disk/by-uuid/c44fbbe8-f708-4bbd-9dfc-8a0fa15fc956
