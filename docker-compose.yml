@@ -256,22 +256,6 @@ services:
       - "TZ=${DEFAULT_TIMEZONE}"
 
 # =========================
-# =       MONITORING      =
-# =========================
-  logzio-logs:
-    image: logzio/docker-collector-logs
-    container_name: logzio-logs
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers
-    environment:
-      - "TZ=${DEFAULT_TIMEZONE}"
-      - "LOGZIO_TOKEN=${LOGZIO_TOKEN}"
-      - "LOGZIO_URL=${LOGZIO_URL}"
-      - "matchContainerName=borgmatic"
-
-# =========================
 # =         BACKUP        =
 # =========================
   borgmatic:
