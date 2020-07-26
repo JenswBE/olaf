@@ -1,0 +1,6 @@
+http:
+    middlewares:
+      SecureHttps:
+        headers:
+          stsSeconds: 15552000
+          sslredirect: true

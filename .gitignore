@@ -25,7 +25,5 @@
 !/conf/borgmatic/ssh/
 !/conf/borgmatic/ssh/.gitkeep
 
-!/conf/
-!/conf/borgserver/
-!/conf/borgserver/clients/
-!/conf/borgserver/clients/.gitkeep
+!/conf/traefik/
+!/conf/traefik/traefik-common.yml

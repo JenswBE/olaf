@@ -42,17 +42,20 @@ services:
     container_name: traefik
     restart: always
     command:
-      - "--log.level=DEBUG"
+      - "--providers.file.directory=/conf"
+      - "--providers.file.watch=true"
       - "--providers.docker=true"
+      - "--providers.docker.defaultRule="
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.le-on-cf.acme.tlsChallenge=true"
-      - "--certificatesresolvers.le-on-cf.acme.email=${ADMIN_MAIL}"
-      - "--certificatesresolvers.le-on-cf.acme.storage=/letsencrypt/acme.json"
-      - "--api.dashboard=true"
-      - "--ping=true"
-      - "--ping.entrypoint=websecure"
+      - "--entrypoints.websecure.http.middlewares=SecureHttps@file"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.le-tls.acme.tlsChallenge=true"
+      - "--certificatesresolvers.le-tls.acme.email=${ADMIN_MAIL}"
+      - "--certificatesresolvers.le-tls.acme.storage=/letsencrypt/acme.json"
+      - "--api=true"
       - "--ping.manualrouting=true"
     ports:
       - 80:80
@@ -62,27 +65,23 @@ services:
       - frontend-transmission
       - frontend-minio
     volumes:
+      - ./conf/traefik:/conf
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-cert:/letsencrypt/
     environment:
       - "TZ=${DEFAULT_TIMEZONE}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
-      - "traefik.http.routers.https-redirect.entrypoints=web"
-      - "traefik.http.routers.https-redirect.rule=HostRegexp(`{any:.*}`)"
-      - "traefik.http.routers.https-redirect.middlewares=https-redirect"
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.rule=Host(`traefik-${HOSTNAME}.${DEFAULT_DOMAIN}`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.middlewares.api-auth.basicauth.users=${TRAEFIK_API_USER}"
       - "traefik.http.routers.api.middlewares=api-auth"
-      - "traefik.http.routers.api.tls.certresolver=le-on-cf"
+      - "traefik.http.routers.api.tls.certresolver=le-tls"
       - "traefik.http.routers.ping.entrypoints=websecure"
       - "traefik.http.routers.ping.rule=Host(`ping-${HOSTNAME}.${DEFAULT_DOMAIN}`)"
       - "traefik.http.routers.ping.service=ping@internal"
-      - "traefik.http.routers.ping.tls.certresolver=le-on-cf"
+      - "traefik.http.routers.ping.tls.certresolver=le-tls"
 
 # =========================
 # =    Cloudflare DDNS    =
@@ -142,7 +141,7 @@ services:
       - "traefik.docker.network=frontend-transmission"
       - "traefik.http.routers.torrent.entrypoints=websecure"
       - "traefik.http.routers.torrent.rule=Host(`torrent.${DEFAULT_DOMAIN}`)"
-      - "traefik.http.routers.torrent.tls.certresolver=le-on-cf"
+      - "traefik.http.routers.torrent.tls.certresolver=le-tls"
       - "traefik.http.services.torrent.loadbalancer.server.port=9091"
 
 # =========================
@@ -208,7 +207,7 @@ services:
       - "traefik.http.routers.tmm.entrypoints=websecure"
       - "traefik.http.routers.tmm.rule=Host(`tmm.${DEFAULT_DOMAIN}`)"
       - "traefik.http.routers.tmm.middlewares=tmm-auth"
-      - "traefik.http.routers.tmm.tls.certresolver=le-on-cf"
+      - "traefik.http.routers.tmm.tls.certresolver=le-tls"
       - "traefik.http.services.tmm.loadbalancer.server.port=5800"
 
 # =========================
@@ -232,7 +231,7 @@ services:
       - "traefik.docker.network=frontend-minio"
       - "traefik.http.routers.minio.entrypoints=websecure"
       - "traefik.http.routers.minio.rule=Host(`minio-${HOSTNAME}.${DEFAULT_DOMAIN}`)"
-      - "traefik.http.routers.minio.tls.certresolver=le-on-cf"
+      - "traefik.http.routers.minio.tls.certresolver=le-tls"
       - "traefik.http.services.minio.loadbalancer.server.port=9000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
