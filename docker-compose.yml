@@ -42,6 +42,7 @@ services:
     container_name: traefik
     restart: always
     command:
+      # - "--log.level=DEBUG"
       - "--providers.file.directory=/conf"
       - "--providers.file.watch=true"
       - "--providers.docker=true"
