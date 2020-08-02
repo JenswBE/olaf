@@ -36,5 +36,6 @@ hooks:
         - echo "`date` - Starting backup"
     after_backup:
         - echo "`date` - Finished backup"
+        - wget https://hc-ping.com/<PING_ID> -T 10 -t 5 -O /dev/null
     on_error:
         - echo "Error while creating a backup."
