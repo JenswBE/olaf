@@ -33,9 +33,10 @@ consistency:
 
 hooks:
     before_backup:
-        - echo "`date` - Starting backup"
+        - "echo $(date): Borgmatic - Backup started"
     after_backup:
-        - echo "`date` - Finished backup"
-        - wget https://hc-ping.com/<PING_ID> -T 10 -t 5 -O /dev/null
+        - "echo $(date): Borgmatic - Send ping to Healthchecks.io"
+        - "wget https://hc-ping.com/<PING_ID> -T 10 -t 5 -O /dev/null"
+        - "echo $(date): Borgmatic - Backup finished"
     on_error:
-        - echo "Error while creating a backup."
+        - "echo $(date): Borgmatic - Backup failed"
