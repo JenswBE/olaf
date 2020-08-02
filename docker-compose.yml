@@ -88,7 +88,7 @@ services:
 # =    Cloudflare DDNS    =
 # =========================
   cloudflare-ddns:
-    image: oznu/cloudflare-ddns
+    image: oznu/cloudflare-ddns:latest
     container_name: cloudflare-ddns
     restart: always
     environment:
@@ -118,7 +118,7 @@ services:
 # =        TORRENT        =
 # =========================
   transmission:
-    image: linuxserver/transmission
+    image: linuxserver/transmission:latest
     container_name: transmission
     restart: always
     networks:
@@ -149,7 +149,7 @@ services:
 # =         SAMBA         =
 # =========================
   samba:
-    image: dperson/samba
+    image: dperson/samba:latest
     container_name: samba
     restart: always
     networks:
@@ -169,7 +169,7 @@ services:
 # =          PLEX         =
 # =========================
   plex:
-    image: plexinc/pms-docker
+    image: plexinc/pms-docker:latest
     container_name: plex
     restart: always
     network_mode: "host"
@@ -189,7 +189,7 @@ services:
 # =   TINY MEDIA MANAGER  =
 # =========================
   tmm:
-    image: romancin/tinymediamanager
+    image: romancin/tinymediamanager:latest
     container_name: tmm
     restart: always
     networks:
@@ -244,7 +244,7 @@ services:
 # =      BORG SERVER      =
 # =========================
   borgserver:
-    image: nold360/borgserver
+    image: nold360/borgserver:latest
     container_name: borgserver
     restart: always
     ports:
@@ -259,7 +259,7 @@ services:
 # =         BACKUP        =
 # =========================
   borgmatic:
-    image: b3vis/borgmatic
+    image: b3vis/borgmatic:latest
     container_name: borgmatic
     restart: always
     volumes:
