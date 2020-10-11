@@ -1,3 +1,5 @@
+**This repo has been replaced by [JenswBE/ansible](https://github.com/JenswBE/ansible/)**
+
 # Olaf the Great NAS
 Config for my home NAS
 
